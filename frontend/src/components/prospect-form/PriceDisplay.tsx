@@ -80,30 +80,30 @@ export function PriceDisplay({ cotizador }: Props) {
   if (!hasResponses && !price) return null
 
   return (
-    <div className="mt-4 overflow-hidden rounded-lg border bg-card">
-      <div className="flex items-center justify-between border-b px-4 py-2.5">
-        <span className="text-xs font-medium text-muted-foreground">
+    <div className="mt-4 overflow-hidden rounded-lg bg-card shadow-sm gradient-border animate-fade-in-up">
+      <div className="flex items-center justify-between border-b px-4 py-2.5 bg-primary/3">
+        <span className="text-xs font-semibold uppercase tracking-wide text-primary/70">
           Precio estimado
         </span>
-        {loading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+        {loading && <Loader2 className="h-3.5 w-3.5 animate-spin text-primary/50" />}
       </div>
 
-      <div className="px-4 py-3">
+      <div className="px-4 py-4">
         {price ? (
           <>
             {price.desglose.length > 1 && (
-              <div className="mb-2 space-y-1">
+              <div className="mb-3 space-y-1.5">
                 {price.desglose.map((item, i) => (
                   <div key={i} className="flex items-center justify-between text-xs text-muted-foreground">
                     <span>{item.regla}</span>
-                    <span>{formatCOP(item.valor)}</span>
+                    <span className="font-medium">{formatCOP(item.valor)}</span>
                   </div>
                 ))}
-                <div className="my-1.5 h-px bg-border" />
+                <div className="my-2 h-px bg-gradient-to-r from-primary/20 via-primary/10 to-transparent" />
               </div>
             )}
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-medium">Total</span>
+              <span className="text-sm font-semibold">Total</span>
               <span className="text-2xl font-bold tracking-tight text-primary">
                 {formatCOP(price.total)}
               </span>
@@ -113,7 +113,7 @@ export function PriceDisplay({ cotizador }: Props) {
             </p>
           </>
         ) : (
-          <p className="text-center text-xs text-muted-foreground">
+          <p className="text-center text-xs text-muted-foreground py-1">
             Completa el formulario para ver el precio
           </p>
         )}

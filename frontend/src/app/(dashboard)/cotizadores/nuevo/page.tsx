@@ -15,12 +15,12 @@ export default function NuevoCotizadorPage() {
   }, [reset])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       <div className="flex items-center justify-end">
         <AIGeneratorDialog
           trigger={
-            <Button variant="outline">
-              <Sparkles className="mr-2 h-4 w-4" />
+            <Button variant="outline" className="cursor-pointer gap-2 border-primary/30 text-primary transition-all duration-200 hover:bg-primary/5 hover:border-primary/50 animate-pulse-glow">
+              <Sparkles className="h-4 w-4" />
               Crear con IA
             </Button>
           }

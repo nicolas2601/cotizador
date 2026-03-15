@@ -94,98 +94,137 @@ export function MultiStepForm({ cotizador }: Props) {
 
   const pasoActualData = isFormStep ? pasos[pasoActual] : null
 
+  // Brand color fallback to purple
+  const brandColor = "#800080"
+
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
-      {/* Header */}
-      <div className="mb-8 text-center">
-        {cotizador.negocio_logo && (
-          <img
-            src={cotizador.negocio_logo}
-            alt={cotizador.negocio_nombre || "Logo"}
-            className="mx-auto mb-4 h-10 object-contain"
-          />
-        )}
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {cotizador.nombre}
-        </h1>
-        {cotizador.descripcion && (
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            {cotizador.descripcion}
-          </p>
-        )}
-      </div>
-
-      {/* Progress bar */}
-      <div className="mb-6">
-        <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
-          <span>
-            Paso {pasoActual + 1} de {totalPasos}
-          </span>
-          <span>{Math.round(progress)}%</span>
-        </div>
-        <Progress value={progress} className="h-1.5" />
-      </div>
-
-      {/* Step content with transition */}
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/3">
+      {/* Header area with branding */}
       <div
-        key={pasoActual}
-        className="animate-in fade-in slide-in-from-right-4 duration-300"
+        className="relative overflow-hidden px-4 pb-8 pt-10 sm:pt-14"
+        style={{
+          background: `linear-gradient(135deg, ${brandColor}12 0%, transparent 60%)`,
+        }}
       >
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">
-              {isFormStep ? pasoActualData?.titulo || `Paso ${pasoActual + 1}` : "Datos de contacto"}
-            </CardTitle>
-            {isFormStep && pasoActualData?.descripcion && (
-              <CardDescription>{pasoActualData.descripcion}</CardDescription>
-            )}
-            {isLastStep && (
-              <CardDescription>
-                Completa tus datos para recibir la cotizacion en tu correo
-              </CardDescription>
-            )}
-          </CardHeader>
-
-          <CardContent className="space-y-5">
-            {isFormStep && pasoActualData ? (
-              <StepRenderer campos={pasoActualData.campos} />
-            ) : (
-              <ContactStep cotizador={cotizador} respuestas={respuestas} />
-            )}
-          </CardContent>
-        </Card>
+        <div className="absolute top-0 right-0 h-40 w-40 rounded-full blur-[60px]" style={{ backgroundColor: `${brandColor}10` }} />
+        <div className="mx-auto max-w-2xl text-center">
+          {cotizador.negocio_logo && (
+            <img
+              src={cotizador.negocio_logo}
+              alt={cotizador.negocio_nombre || "Logo"}
+              className="mx-auto mb-4 h-10 object-contain animate-fade-in-up"
+            />
+          )}
+          {!cotizador.negocio_logo && cotizador.negocio_nombre && (
+            <p
+              className="mb-4 text-sm font-semibold uppercase tracking-widest animate-fade-in-up"
+              style={{ color: brandColor }}
+            >
+              {cotizador.negocio_nombre}
+            </p>
+          )}
+          <h1 className="text-2xl font-semibold tracking-tight animate-fade-in-up" style={{ animationDelay: "0.05s" }}>
+            {cotizador.nombre}
+          </h1>
+          {cotizador.descripcion && (
+            <p className="mt-1.5 text-sm text-muted-foreground animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+              {cotizador.descripcion}
+            </p>
+          )}
+        </div>
       </div>
 
-      {/* Price display */}
-      <PriceDisplay cotizador={cotizador} />
+      <div className="mx-auto max-w-2xl px-4 pb-12">
+        {/* Progress bar */}
+        <div className="mb-6 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
+          <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
+            <span>
+              Paso {pasoActual + 1} de {totalPasos}
+            </span>
+            <span>{Math.round(progress)}%</span>
+          </div>
+          <div className="progress-purple">
+            <Progress value={progress} className="h-2" />
+          </div>
+        </div>
 
-      {/* Navigation */}
-      <div className="mt-6 flex items-center justify-between">
-        <Button
-          variant="outline"
-          onClick={anterior}
-          disabled={pasoActual === 0}
-          className="gap-2"
+        {/* Step content with transition */}
+        <div
+          key={pasoActual}
+          className="animate-in fade-in slide-in-from-right-4 duration-300"
         >
-          <ArrowLeft className="h-4 w-4" />
-          Anterior
-        </Button>
+          <Card className="overflow-hidden shadow-sm border-border/60">
+            <div className="h-0.5" style={{ background: `linear-gradient(90deg, ${brandColor}, ${brandColor}80)` }} />
+            <CardHeader>
+              <CardTitle className="text-lg">
+                {isFormStep ? pasoActualData?.titulo || `Paso ${pasoActual + 1}` : "Datos de contacto"}
+              </CardTitle>
+              {isFormStep && pasoActualData?.descripcion && (
+                <CardDescription>{pasoActualData.descripcion}</CardDescription>
+              )}
+              {isLastStep && (
+                <CardDescription>
+                  Completa tus datos para recibir la cotizacion en tu correo
+                </CardDescription>
+              )}
+            </CardHeader>
 
-        {isLastStep ? (
-          <Button onClick={enviar} disabled={sending} className="gap-2">
-            {sending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-            {sending ? "Enviando..." : "Recibir mi cotizacion"}
+            <CardContent className="space-y-5">
+              {isFormStep && pasoActualData ? (
+                <StepRenderer campos={pasoActualData.campos} />
+              ) : (
+                <ContactStep cotizador={cotizador} respuestas={respuestas} />
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Price display */}
+        <PriceDisplay cotizador={cotizador} />
+
+        {/* Navigation */}
+        <div className="mt-6 flex items-center justify-between">
+          <Button
+            variant="outline"
+            onClick={anterior}
+            disabled={pasoActual === 0}
+            className="cursor-pointer gap-2 transition-all duration-200 hover:bg-accent"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Anterior
           </Button>
-        ) : (
-          <Button onClick={siguiente} className="gap-2">
-            Siguiente
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        )}
+
+          {isLastStep ? (
+            <Button
+              onClick={enviar}
+              disabled={sending}
+              className="cursor-pointer gap-2 bg-gradient-to-r from-primary to-[oklch(0.55_0.16_310)] text-white shadow-lg shadow-primary/25 transition-all duration-200 hover:shadow-xl hover:shadow-primary/35 hover:brightness-110 animate-pulse-glow"
+              style={{
+                background: `linear-gradient(135deg, ${brandColor}, ${brandColor}cc)`,
+                boxShadow: `0 4px 14px ${brandColor}30`,
+              }}
+            >
+              {sending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+              {sending ? "Enviando..." : "Recibir mi cotizacion"}
+            </Button>
+          ) : (
+            <Button
+              onClick={siguiente}
+              className="cursor-pointer gap-2 transition-all duration-200 hover:brightness-110"
+              style={{
+                background: `linear-gradient(135deg, ${brandColor}, ${brandColor}cc)`,
+                color: "white",
+              }}
+            >
+              Siguiente
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   )

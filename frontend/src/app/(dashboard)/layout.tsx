@@ -7,7 +7,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <Providers>
       <AuthGuard>
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/3">
           <DashboardNav />
           <main className="mx-auto max-w-7xl px-4 py-8">{children}</main>
           <Toaster />

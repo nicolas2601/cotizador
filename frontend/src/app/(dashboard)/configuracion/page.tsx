@@ -54,13 +54,13 @@ export default function ConfiguracionPage() {
     return (
       <div className="space-y-4">
         <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-[300px] w-full" />
+        <div className="h-[300px] w-full rounded-lg animate-shimmer" />
       </div>
     )
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in-up">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Configuracion</h1>
@@ -71,7 +71,7 @@ export default function ConfiguracionPage() {
         <Button
           onClick={handleGuardar}
           disabled={actualizarNegocio.isPending}
-          className="gap-2"
+          className="cursor-pointer gap-2 bg-gradient-to-r from-primary to-[oklch(0.55_0.16_310)] text-white shadow-md shadow-primary/20 transition-all duration-200 hover:shadow-lg hover:shadow-primary/30 hover:brightness-110"
         >
           {actualizarNegocio.isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -83,7 +83,7 @@ export default function ConfiguracionPage() {
       </div>
 
       {/* Mi negocio */}
-      <Card>
+      <Card className="overflow-hidden border-t-2 border-t-primary shadow-sm transition-shadow duration-300 hover:shadow-md">
         <CardHeader>
           <CardTitle className="text-lg">Mi negocio</CardTitle>
           <CardDescription>
@@ -98,6 +98,7 @@ export default function ConfiguracionPage() {
                 id="nombre-negocio"
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
+                className="transition-all duration-200 focus-visible:ring-primary/40"
               />
             </div>
             <div className="space-y-2">
@@ -107,6 +108,7 @@ export default function ConfiguracionPage() {
                 value={telefono}
                 onChange={(e) => setTelefono(e.target.value)}
                 placeholder="+57 300 000 0000"
+                className="transition-all duration-200 focus-visible:ring-primary/40"
               />
             </div>
             <div className="space-y-2">
@@ -116,6 +118,7 @@ export default function ConfiguracionPage() {
                 value={sitioWeb}
                 onChange={(e) => setSitioWeb(e.target.value)}
                 placeholder="https://tikno.pro"
+                className="transition-all duration-200 focus-visible:ring-primary/40"
               />
             </div>
             <div className="space-y-2">
@@ -131,7 +134,7 @@ export default function ConfiguracionPage() {
                 <Input
                   value={colorPrimario}
                   onChange={(e) => setColorPrimario(e.target.value)}
-                  className="w-28 font-mono text-sm"
+                  className="w-28 font-mono text-sm transition-all duration-200 focus-visible:ring-primary/40"
                   maxLength={7}
                 />
               </div>
@@ -154,7 +157,7 @@ export default function ConfiguracionPage() {
           <div>
             <Label>Vista previa del PDF</Label>
             <div
-              className="mt-3 rounded-lg border p-6"
+              className="mt-3 rounded-lg border p-6 shadow-sm transition-shadow duration-300 hover:shadow-md"
               style={{ borderTopColor: colorPrimario, borderTopWidth: 3 }}
             >
               <div className="flex items-center justify-between">
@@ -193,7 +196,7 @@ export default function ConfiguracionPage() {
       </Card>
 
       {/* Cuenta */}
-      <Card>
+      <Card className="shadow-sm transition-shadow duration-300 hover:shadow-md">
         <CardHeader>
           <CardTitle className="text-lg">Cuenta</CardTitle>
           <CardDescription>Informacion de tu cuenta de usuario</CardDescription>

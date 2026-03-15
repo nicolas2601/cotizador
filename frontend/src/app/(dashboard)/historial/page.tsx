@@ -42,7 +42,7 @@ export default function HistorialPage() {
   })
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Historial</h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -57,11 +57,11 @@ export default function HistorialPage() {
             placeholder="Buscar por nombre, email o cotizador..."
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
-            className="h-9"
+            className="h-9 transition-all duration-200 focus-visible:ring-primary/40"
           />
         </div>
         <Select value={filtroEstado} onValueChange={setFiltroEstado}>
-          <SelectTrigger className="h-9 w-auto gap-1.5">
+          <SelectTrigger className="h-9 w-auto gap-1.5 cursor-pointer transition-colors duration-200 hover:border-primary/40">
             <Filter className="h-3.5 w-3.5 text-muted-foreground" />
             <SelectValue placeholder="Estado" />
           </SelectTrigger>
@@ -80,12 +80,14 @@ export default function HistorialPage() {
       {isLoading ? (
         <div className="space-y-2">
           {[1, 2, 3, 4, 5].map((i) => (
-            <Skeleton key={i} className="h-12 w-full" />
+            <div key={i} className="h-12 w-full rounded-md animate-shimmer" />
           ))}
         </div>
       ) : filtradas.length === 0 ? (
         <div className="flex flex-col items-center py-16 text-center">
-          <FileText className="mb-3 h-10 w-10 text-muted-foreground/40" />
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/8">
+            <FileText className="h-6 w-6 text-primary/50" />
+          </div>
           <p className="font-medium">Sin cotizaciones</p>
           <p className="mt-1 text-sm text-muted-foreground">
             {busqueda || filtroEstado !== "todos"
@@ -94,15 +96,15 @@ export default function HistorialPage() {
           </p>
         </div>
       ) : (
-        <div className="rounded-lg border">
+        <div className="overflow-hidden rounded-lg border shadow-sm">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Prospecto</TableHead>
-                <TableHead className="hidden sm:table-cell">Cotizador</TableHead>
-                <TableHead className="text-right">Precio</TableHead>
-                <TableHead>Estado</TableHead>
+              <TableRow className="bg-muted/40">
+                <TableHead className="font-semibold">Fecha</TableHead>
+                <TableHead className="font-semibold">Prospecto</TableHead>
+                <TableHead className="hidden font-semibold sm:table-cell">Cotizador</TableHead>
+                <TableHead className="text-right font-semibold">Precio</TableHead>
+                <TableHead className="font-semibold">Estado</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
@@ -111,7 +113,7 @@ export default function HistorialPage() {
                 <TableRow
                   key={cot.id}
                   onClick={() => setSelected(cot)}
-                  className="cursor-pointer"
+                  className="cursor-pointer transition-colors duration-150 hover:bg-primary/4"
                 >
                   <TableCell className="text-xs text-muted-foreground">
                     {new Date(cot.created_at).toLocaleDateString("es-CO", {
@@ -129,12 +131,12 @@ export default function HistorialPage() {
                   <TableCell className="hidden text-sm text-muted-foreground sm:table-cell">
                     {cot.cotizador_nombre}
                   </TableCell>
-                  <TableCell className="text-right text-sm font-medium">
+                  <TableCell className="text-right text-sm font-semibold text-primary">
                     {formatCOP(Number(cot.total))}
                   </TableCell>
                   <TableCell>
                     <span
-                      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${
                         ESTADO_COLORS[cot.estado] || ""
                       }`}
                     >
@@ -151,6 +153,7 @@ export default function HistorialPage() {
                           window.open(cot.pdf_url, "_blank")
                         }}
                         title="Ver PDF"
+                        className="cursor-pointer transition-colors duration-200 hover:text-primary"
                       >
                         <FileText className="h-3.5 w-3.5" />
                       </Button>

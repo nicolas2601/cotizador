@@ -31,6 +31,7 @@ export function StepRenderer({ campos }: Props) {
               placeholder={campo.placeholder || ""}
               value={respuestas[campo.id] || ""}
               onChange={(e) => setRespuesta(campo.id, e.target.value)}
+              className="transition-all duration-200 focus-visible:ring-primary/40"
             />
           )}
 
@@ -43,6 +44,7 @@ export function StepRenderer({ campos }: Props) {
               max={campo.max ?? undefined}
               value={respuestas[campo.id] || ""}
               onChange={(e) => setRespuesta(campo.id, e.target.value)}
+              className="transition-all duration-200 focus-visible:ring-primary/40"
             />
           )}
 
@@ -55,12 +57,12 @@ export function StepRenderer({ campos }: Props) {
               {campo.opciones.map((opcion) => (
                 <label
                   key={opcion.valor}
-                  className="flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition-colors hover:bg-muted/50 has-[data-state=checked]:border-primary has-[data-state=checked]:bg-primary/5"
+                  className="flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition-all duration-200 hover:bg-primary/3 hover:border-primary/30 has-[data-state=checked]:border-primary has-[data-state=checked]:bg-primary/5 has-[data-state=checked]:shadow-sm has-[data-state=checked]:shadow-primary/10"
                 >
                   <RadioGroupItem value={opcion.valor} />
                   <span className="flex-1 text-sm">{opcion.label}</span>
                   {opcion.valor && !isNaN(Number(opcion.valor)) && (
-                    <span className="text-xs font-medium text-muted-foreground">
+                    <span className="text-xs font-semibold text-primary/70">
                       {formatCOP(Number(opcion.valor))}
                     </span>
                   )}
@@ -79,7 +81,7 @@ export function StepRenderer({ campos }: Props) {
                 max={campo.max ?? undefined}
                 value={respuestas[campo.id] || ""}
                 onChange={(e) => setRespuesta(campo.id, e.target.value)}
-                className="pr-12"
+                className="pr-12 transition-all duration-200 focus-visible:ring-primary/40"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
                 {campo.unidad || "m\u00B2"}
@@ -99,7 +101,7 @@ export function StepRenderer({ campos }: Props) {
               />
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>{campo.min ?? 0}</span>
-                <span className="rounded bg-primary/10 px-2 py-0.5 font-medium text-primary">
+                <span className="rounded-full bg-gradient-to-r from-primary/15 to-primary/8 px-3 py-1 font-semibold text-primary">
                   {respuestas[campo.id] || campo.min || 0} {campo.unidad || ""}
                 </span>
                 <span>{campo.max ?? 100}</span>

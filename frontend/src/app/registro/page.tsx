@@ -70,16 +70,32 @@ export default function RegistroPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-sm">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4">
+      {/* Gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[oklch(0.25_0.12_300)] via-[oklch(0.18_0.10_290)] to-[oklch(0.12_0.08_310)]" />
+
+      {/* Animated gradient orbs */}
+      <div className="absolute top-1/3 right-1/4 h-80 w-80 rounded-full bg-[oklch(0.40_0.18_300/0.25)] blur-[80px] animate-float-orb" />
+      <div className="absolute bottom-1/3 left-1/4 h-96 w-96 rounded-full bg-[oklch(0.50_0.15_320/0.20)] blur-[100px] animate-float-orb" style={{ animationDelay: "-5s" }} />
+      <div className="absolute top-1/4 left-1/2 h-48 w-48 rounded-full bg-[oklch(0.45_0.20_280/0.15)] blur-[60px] animate-float-orb" style={{ animationDelay: "-9s" }} />
+
+      {/* Card */}
+      <Card className="animate-fade-in-up relative z-10 w-full max-w-sm border-white/10 bg-white/10 backdrop-blur-xl shadow-2xl shadow-black/20">
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Crear cuenta</CardTitle>
-          <CardDescription>Registra tu negocio en Tikno</CardDescription>
+          <div className="mb-2">
+            <span className="bg-gradient-to-r from-white to-purple-200 bg-clip-text text-2xl font-bold tracking-tight text-transparent">
+              Tikno
+            </span>
+          </div>
+          <CardTitle className="text-lg text-white/90">Crear cuenta</CardTitle>
+          <CardDescription className="text-white/60">
+            Registra tu negocio en Tikno
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="nombre-negocio">Nombre del negocio</Label>
+              <Label htmlFor="nombre-negocio" className="text-white/80">Nombre del negocio</Label>
               <Input
                 id="nombre-negocio"
                 placeholder="Mi Empresa"
@@ -89,23 +105,24 @@ export default function RegistroPage() {
                   setSlug(generarSlug(e.target.value))
                 }}
                 autoFocus
+                className="border-white/15 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-purple-400/50"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="slug">URL de tu cotizador</Label>
+              <Label htmlFor="slug" className="text-white/80">URL de tu cotizador</Label>
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-muted-foreground">/q/</span>
+                <span className="text-xs text-white/40">/q/</span>
                 <Input
                   id="slug"
                   placeholder="mi-empresa"
                   value={slug}
                   onChange={(e) => setSlug(e.target.value)}
-                  className="font-mono text-sm"
+                  className="border-white/15 bg-white/10 font-mono text-sm text-white placeholder:text-white/40 focus-visible:ring-purple-400/50"
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="reg-email">Email</Label>
+              <Label htmlFor="reg-email" className="text-white/80">Email</Label>
               <Input
                 id="reg-email"
                 type="email"
@@ -113,10 +130,11 @@ export default function RegistroPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
+                className="border-white/15 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-purple-400/50"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="reg-password">Contrasena</Label>
+              <Label htmlFor="reg-password" className="text-white/80">Contrasena</Label>
               <Input
                 id="reg-password"
                 type="password"
@@ -124,21 +142,26 @@ export default function RegistroPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="new-password"
+                className="border-white/15 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-purple-400/50"
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full cursor-pointer bg-gradient-to-r from-primary to-[oklch(0.55_0.16_310)] text-white shadow-lg shadow-primary/25 transition-all duration-200 hover:shadow-xl hover:shadow-primary/30 hover:brightness-110"
+              disabled={loading}
+            >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Crear cuenta
             </Button>
           </form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
+          <p className="mt-4 text-center text-sm text-white/50">
             Ya tienes cuenta?{" "}
-            <a href="/login" className="font-medium text-foreground hover:underline">
+            <a href="/login" className="font-medium text-white/80 transition-colors hover:text-white hover:underline">
               Iniciar sesion
             </a>
           </p>
-          <p className="mt-2 text-center text-sm text-muted-foreground">
-            <a href="/docs" className="cursor-pointer transition-colors hover:text-foreground hover:underline">
+          <p className="mt-2 text-center text-sm text-white/50">
+            <a href="/docs" className="cursor-pointer transition-colors hover:text-white/80 hover:underline">
               Ver documentacion
             </a>
           </p>
