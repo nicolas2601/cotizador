@@ -2,22 +2,31 @@
 
 import { use, useEffect, useState } from "react"
 import { useFormBuilderStore } from "@/stores/form-builder-store"
+import { useAuthStore } from "@/stores/auth-store"
+import { apiFetch } from "@/lib/api"
 import { FormBuilder } from "@/components/form-builder/FormBuilder"
 import { Skeleton } from "@/components/ui/skeleton"
+import type { Cotizador } from "@/types/cotizador"
 
 export default function EditarCotizadorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const cargarCotizador = useFormBuilderStore((s) => s.cargarCotizador)
+  const token = useAuthStore((s) => s.token)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // TODO: fetch from API when auth is ready
-    // apiFetch(`/cotizadores/${id}/`, { token }).then((data) => {
-    //   cargarCotizador(data)
-    //   setLoading(false)
-    // })
-    setLoading(false)
-  }, [id, cargarCotizador])
+    if (!token) {
+      setLoading(false)
+      return
+    }
+    apiFetch<Cotizador>(`/cotizadores/${id}/`, { token })
+      .then((data) => {
+        cargarCotizador(data)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [id, token, cargarCotizador])
 
   if (loading) {
     return (

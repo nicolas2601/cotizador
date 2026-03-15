@@ -1,23 +1,40 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Plus, ExternalLink, Pencil, Copy } from "lucide-react"
+import { Plus, ExternalLink, Pencil, Copy, Sparkles } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useAuthStore } from "@/stores/auth-store"
+import { apiFetch } from "@/lib/api"
+import { AIGeneratorDialog } from "@/components/form-builder/AIGeneratorDialog"
 import type { Cotizador } from "@/types/cotizador"
 
 export default function CotizadoresPage() {
   const [cotizadores, setCotizadores] = useState<Cotizador[]>([])
   const [loading, setLoading] = useState(true)
+  const token = useAuthStore((s) => s.token)
 
   useEffect(() => {
-    // TODO: fetch from API when auth is ready
-    setLoading(false)
-  }, [])
+    if (!token) {
+      setLoading(false)
+      return
+    }
+    apiFetch<Cotizador[]>("/cotizadores/", { token })
+      .then((data) => {
+        setCotizadores(data)
+      })
+      .catch((err) => {
+        const message = err instanceof Error ? err.message : "Error al cargar cotizadores"
+        toast.error(message)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [token])
 
   function copiarLink(slug: string) {
     const url = `${window.location.origin}/c/${slug}`
@@ -63,12 +80,22 @@ export default function CotizadoresPage() {
             <p className="mt-1 text-sm text-muted-foreground">
               Crea tu primer cotizador para empezar a recibir propuestas
             </p>
-            <Button className="mt-6" asChild>
-              <a href="/cotizadores/nuevo">
-                <Plus className="mr-2 h-4 w-4" />
-                Crear cotizador
-              </a>
-            </Button>
+            <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+              <Button asChild>
+                <a href="/cotizadores/nuevo">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Crear cotizador
+                </a>
+              </Button>
+              <AIGeneratorDialog
+                trigger={
+                  <Button variant="outline">
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    O crea uno con IA
+                  </Button>
+                }
+              />
+            </div>
           </div>
         </Card>
       ) : (

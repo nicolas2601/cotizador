@@ -1,3 +1,5 @@
 from django.db import models
 
-# Create your models here.
+# La app de IA no requiere modelos propios por ahora.
+# Utiliza los modelos de apps.cotizadores (Cotizador, ReglaPrecio)
+# para persistir los cotizadores generados por IA.

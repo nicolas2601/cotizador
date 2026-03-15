@@ -1,6 +1,7 @@
 "use client"
 
 import { useRef, useState } from "react"
+import { useRouter } from "next/navigation"
 import { GripVertical, Plus, Save, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -13,8 +14,11 @@ import { Card } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
 import { useFormBuilderStore } from "@/stores/form-builder-store"
+import { useAuthStore } from "@/stores/auth-store"
+import { apiFetch } from "@/lib/api"
 import { StepEditor } from "./StepEditor"
 import { PricingRuleEditor } from "./PricingRuleEditor"
+import type { Cotizador } from "@/types/cotizador"
 
 interface FormBuilderProps {
   mode: "crear" | "editar"
@@ -23,6 +27,8 @@ interface FormBuilderProps {
 
 export function FormBuilder({ mode, cotizadorId }: FormBuilderProps) {
   const store = useFormBuilderStore()
+  const token = useAuthStore((s) => s.token)
+  const router = useRouter()
   const [saving, setSaving] = useState(false)
   const dragItem = useRef<number | null>(null)
   const dragOverItem = useRef<number | null>(null)
@@ -41,16 +47,48 @@ export function FormBuilder({ mode, cotizadorId }: FormBuilderProps) {
 
     setSaving(true)
     try {
-      // TODO: connect to API
-      // const payload = {
-      //   nombre: store.nombre,
-      //   slug: store.slug,
-      //   descripcion: store.descripcion,
-      //   configuracion: store.configuracion,
-      // }
+      const payload = {
+        nombre: store.nombre,
+        slug: store.slug,
+        descripcion: store.descripcion,
+        configuracion: store.configuracion,
+      }
+
+      let cotizador: Cotizador
+      if (mode === "crear") {
+        cotizador = await apiFetch<Cotizador>("/cotizadores/", {
+          method: "POST",
+          body: JSON.stringify(payload),
+          token,
+        })
+      } else {
+        cotizador = await apiFetch<Cotizador>(`/cotizadores/${cotizadorId}/`, {
+          method: "PUT",
+          body: JSON.stringify(payload),
+          token,
+        })
+      }
+
+      // Guardar reglas de precio
+      for (const regla of store.reglasPrecio) {
+        await apiFetch(`/cotizadores/${cotizador.id}/reglas/`, {
+          method: "POST",
+          body: JSON.stringify({
+            nombre: regla.nombre,
+            formula: regla.formula,
+            variables: regla.variables,
+            activa: regla.activa,
+            prioridad: regla.prioridad,
+          }),
+          token,
+        })
+      }
+
       toast.success(mode === "crear" ? "Cotizador creado" : "Cotizador guardado")
+      router.push("/cotizadores")
     } catch (err) {
-      toast.error("Error al guardar")
+      const message = err instanceof Error ? err.message : "Error al guardar"
+      toast.error(message)
     } finally {
       setSaving(false)
     }

@@ -7,4 +7,5 @@ urlpatterns = [
     path("api/cotizadores/", include("apps.cotizadores.urls")),
     path("api/cotizaciones/", include("apps.cotizaciones.urls")),
     path("api/public/", include("apps.cotizadores.urls_public")),
+    path("api/ia/", include("apps.ia.urls")),
 ]

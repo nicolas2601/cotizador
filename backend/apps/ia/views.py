@@ -1,3 +1,219 @@
-from django.shortcuts import render
+import json
+import logging
+import re
 
-# Create your views here.
+from django.conf import settings
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from apps.cotizadores.models import Cotizador, ReglaPrecio
+from apps.cotizadores.serializers import CotizadorSerializer
+
+from .client import OllamaCloudClient, OllamaCloudError
+from .prompts import prompt_generar_cotizador
+
+logger = logging.getLogger(__name__)
+
+CAMPOS_REQUERIDOS_COTIZADOR = {"nombre", "slug", "descripcion", "configuracion"}
+CAMPOS_REQUERIDOS_REGLA = {"nombre", "formula", "variables", "prioridad"}
+TIPOS_CAMPO_VALIDOS = {"texto", "numero", "seleccion", "area_m2", "slider"}
+
+
+def _extraer_json(texto: str) -> dict:
+    """Intenta extraer JSON valido de la respuesta de la IA."""
+    texto = texto.strip()
+
+    # Intentar parsear directamente
+    try:
+        return json.loads(texto)
+    except json.JSONDecodeError:
+        pass
+
+    # Buscar JSON dentro de bloques de codigo markdown
+    match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", texto, re.DOTALL)
+    if match:
+        try:
+            return json.loads(match.group(1))
+        except json.JSONDecodeError:
+            pass
+
+    # Buscar el primer { ... } en el texto
+    match = re.search(r"\{.*\}", texto, re.DOTALL)
+    if match:
+        try:
+            return json.loads(match.group(0))
+        except json.JSONDecodeError:
+            pass
+
+    raise ValueError("No se pudo extraer JSON valido de la respuesta de la IA.")
+
+
+def _validar_estructura(data: dict) -> list[str]:
+    """Valida la estructura del JSON generado. Retorna lista de errores."""
+    errores = []
+
+    for campo in CAMPOS_REQUERIDOS_COTIZADOR:
+        if campo not in data:
+            errores.append(f"Falta el campo requerido: {campo}")
+
+    if errores:
+        return errores
+
+    config = data.get("configuracion", {})
+    pasos = config.get("pasos", [])
+
+    if not isinstance(pasos, list) or len(pasos) == 0:
+        errores.append("La configuracion debe tener al menos un paso.")
+        return errores
+
+    for i, paso in enumerate(pasos):
+        if not isinstance(paso, dict):
+            errores.append(f"El paso {i} debe ser un objeto.")
+            continue
+        if "titulo" not in paso:
+            errores.append(f"El paso {i} requiere 'titulo'.")
+        campos = paso.get("campos", [])
+        if not isinstance(campos, list):
+            errores.append(f"El paso {i}: 'campos' debe ser una lista.")
+            continue
+        for j, campo in enumerate(campos):
+            if not isinstance(campo, dict):
+                errores.append(f"Paso {i}, campo {j}: debe ser un objeto.")
+                continue
+            if "tipo" not in campo or "label" not in campo:
+                errores.append(f"Paso {i}, campo {j}: requiere 'tipo' y 'label'.")
+            elif campo["tipo"] not in TIPOS_CAMPO_VALIDOS:
+                errores.append(
+                    f"Paso {i}, campo {j}: tipo '{campo['tipo']}' invalido. "
+                    f"Validos: {', '.join(sorted(TIPOS_CAMPO_VALIDOS))}"
+                )
+            if "id" not in campo:
+                errores.append(f"Paso {i}, campo {j}: requiere 'id'.")
+
+    reglas = data.get("reglas_precio", [])
+    if not isinstance(reglas, list) or len(reglas) == 0:
+        errores.append("Debe tener al menos una regla de precio.")
+    else:
+        for i, regla in enumerate(reglas):
+            if not isinstance(regla, dict):
+                errores.append(f"La regla {i} debe ser un objeto.")
+                continue
+            for campo in CAMPOS_REQUERIDOS_REGLA:
+                if campo not in regla:
+                    errores.append(f"La regla {i} requiere '{campo}'.")
+
+    return errores
+
+
+class GenerarCotizadorView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        descripcion = request.data.get("descripcion", "").strip()
+
+        if not descripcion:
+            return Response(
+                {"detail": "El campo 'descripcion' es obligatorio."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if len(descripcion) < 10:
+            return Response(
+                {"detail": "La descripcion debe tener al menos 10 caracteres."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Verificar que la IA esta configurada
+        if not getattr(settings, "OLLAMA_CLOUD_API_KEY", ""):
+            return Response(
+                {"detail": "El servicio de IA no esta configurado. Contacte al administrador."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        # Generar el prompt y llamar a la IA
+        prompt = prompt_generar_cotizador(descripcion)
+        client = OllamaCloudClient()
+
+        try:
+            respuesta_raw = client.chat_sync(
+                prompt=prompt,
+                system="Eres un asistente que genera configuraciones JSON para cotizadores de negocios colombianos. Responde UNICAMENTE con JSON valido.",
+            )
+        except OllamaCloudError as e:
+            logger.error(f"Error al comunicarse con la IA: {e}")
+            return Response(
+                {"detail": "Error al comunicarse con el servicio de IA. Intente nuevamente."},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
+        # Parsear la respuesta JSON
+        try:
+            data = _extraer_json(respuesta_raw)
+        except ValueError:
+            logger.error(f"La IA retorno JSON invalido: {respuesta_raw[:500]}")
+            return Response(
+                {"detail": "La IA genero una respuesta invalida. Intente nuevamente con una descripcion mas detallada."},
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+        # Validar la estructura
+        errores = _validar_estructura(data)
+        if errores:
+            logger.warning(f"Estructura invalida generada por IA: {errores}")
+            return Response(
+                {
+                    "detail": "La IA genero una estructura con errores. Intente nuevamente.",
+                    "errores": errores,
+                },
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+        # Crear el Cotizador en la base de datos
+        try:
+            negocio = request.user.negocio
+
+            # Asegurar slug unico
+            slug_base = data["slug"]
+            slug = slug_base
+            counter = 1
+            while Cotizador.objects.filter(negocio=negocio, slug=slug).exists():
+                slug = f"{slug_base}-{counter}"
+                counter += 1
+
+            cotizador = Cotizador.objects.create(
+                negocio=negocio,
+                nombre=data["nombre"],
+                slug=slug,
+                descripcion=data.get("descripcion", ""),
+                configuracion=data["configuracion"],
+                activo=True,
+                moneda="COP",
+            )
+
+            # Crear las reglas de precio
+            reglas_creadas = []
+            for regla_data in data.get("reglas_precio", []):
+                regla = ReglaPrecio.objects.create(
+                    cotizador=cotizador,
+                    nombre=regla_data["nombre"],
+                    formula=regla_data["formula"],
+                    variables=regla_data.get("variables", {}),
+                    activa=True,
+                    prioridad=regla_data.get("prioridad", 0),
+                )
+                reglas_creadas.append(regla)
+
+            # Refrescar para incluir las relaciones
+            cotizador.refresh_from_db()
+            serializer = CotizadorSerializer(cotizador)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            logger.error(f"Error al crear cotizador desde IA: {e}")
+            return Response(
+                {"detail": f"Error al guardar el cotizador: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
