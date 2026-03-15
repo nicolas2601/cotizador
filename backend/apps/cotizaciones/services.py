@@ -106,36 +106,42 @@ class CotizacionService:
 
     @staticmethod
     def subir_pdf_supabase(cotizacion: Cotizacion, pdf_bytes: bytes) -> str:
-        import os
-        from django.conf import settings as django_settings
+        import httpx
+
+        supabase_url = settings.SUPABASE_URL
+        anon_key = settings.SUPABASE_ANON_KEY
+
+        if not supabase_url or not anon_key:
+            logger.warning("Supabase no configurado, PDF no subido")
+            return ""
 
         filename = f"cotizaciones/{cotizacion.negocio.slug}/{cotizacion.id}.pdf"
 
-        # En desarrollo: guardar en disco local (media/)
-        if django_settings.DEBUG:
-            media_path = os.path.join(django_settings.MEDIA_ROOT, filename)
-            os.makedirs(os.path.dirname(media_path), exist_ok=True)
-            with open(media_path, "wb") as f:
-                f.write(pdf_bytes)
-            url = f"/media/{filename}"
-            cotizacion.pdf_url = url
-            cotizacion.save(update_fields=["pdf_url"])
-            logger.info(f"PDF guardado localmente: {media_path}")
-            return url
-
-        # En produccion: subir a Supabase Storage
-        from django.core.files.storage import default_storage
-
         try:
-            path = default_storage.save(filename, ContentFile(pdf_bytes))
-            url = default_storage.url(path)
-            cotizacion.pdf_url = url
-            cotizacion.save(update_fields=["pdf_url"])
-            return url
+            response = httpx.post(
+                f"{supabase_url}/storage/v1/object/media/{filename}",
+                headers={
+                    "Authorization": f"Bearer {anon_key}",
+                    "apikey": anon_key,
+                    "Content-Type": "application/pdf",
+                    "x-upsert": "true",
+                },
+                content=pdf_bytes,
+                timeout=30,
+            )
+
+            if response.status_code in (200, 201):
+                url = f"{supabase_url}/storage/v1/object/public/media/{filename}"
+                cotizacion.pdf_url = url
+                cotizacion.save(update_fields=["pdf_url"])
+                logger.info(f"PDF subido a Supabase: {url}")
+                return url
+            else:
+                logger.error(f"Error Supabase Storage ({response.status_code}): {response.text[:200]}")
+                return ""
+
         except Exception as e:
-            logger.error(f"Error subiendo PDF a storage: {e}")
-            cotizacion.pdf_url = ""
-            cotizacion.save(update_fields=["pdf_url"])
+            logger.error(f"Error subiendo PDF a Supabase: {e}")
             return ""
 
     @staticmethod
