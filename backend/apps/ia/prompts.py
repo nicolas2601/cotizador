@@ -49,34 +49,31 @@ def _formatear_desglose(desglose: list) -> str:
 
 
 def prompt_generar_cotizador(descripcion: str) -> str:
-    return f"""Eres un experto en crear cotizadores para negocios en Colombia.
+    return f"""Eres un experto en crear cotizadores para negocios. El usuario describe su negocio:
 
-El usuario describe su negocio asi:
 "{descripcion}"
 
-Genera un JSON completo para configurar un cotizador automatico. El JSON debe tener EXACTAMENTE esta estructura:
+Genera un JSON para un cotizador automatico. Estructura EXACTA:
 
 {{
   "nombre": "Nombre del cotizador",
-  "slug": "nombre-del-cotizador",
-  "descripcion": "Descripcion breve del cotizador",
+  "slug": "slug-kebab-case",
+  "descripcion": "Descripcion breve",
+  "moneda": "COP",
   "configuracion": {{
     "pasos": [
       {{
-        "id": "un-uuid-unico",
+        "id": "paso-1",
         "titulo": "Titulo del paso",
-        "descripcion": "Que se pregunta en este paso",
+        "descripcion": "Que se pregunta",
         "campos": [
           {{
-            "id": "identificador_snake_case",
+            "id": "tipo_servicio",
             "tipo": "seleccion",
-            "label": "Etiqueta visible",
+            "label": "Que servicio necesitas?",
             "requerido": true,
-            "opciones": [{{"label": "Opcion 1", "valor": "50000"}}, {{"label": "Opcion 2", "valor": "80000"}}],
-            "min": null,
-            "max": null,
-            "step": null,
-            "unidad": null
+            "opciones": [{{"label": "Servicio basico", "valor": "150000"}}, {{"label": "Servicio premium", "valor": "350000"}}],
+            "min": null, "max": null, "step": null, "unidad": null
           }}
         ]
       }}
@@ -84,24 +81,30 @@ Genera un JSON completo para configurar un cotizador automatico. El JSON debe te
   }},
   "reglas_precio": [
     {{
-      "nombre": "Nombre de la regla",
-      "formula": "variable1 + variable2 * cantidad",
-      "variables": {{"margen": 1.2}},
-      "prioridad": 1
+      "nombre": "Precio del servicio",
+      "formula": "tipo_servicio",
+      "variables": {{}},
+      "prioridad": 0
     }}
   ]
 }}
 
-REGLAS OBLIGATORIAS:
-1. Los tipos de campo validos son UNICAMENTE: "seleccion", "numero", "slider", "texto", "area_m2".
-2. Los IDs de los campos DEBEN ser snake_case sin espacios ni caracteres especiales (ej: tipo_servicio, cantidad_personas). Estos IDs se usan como variables en las formulas.
-3. Las formulas en reglas_precio usan los IDs de los campos como variables. Solo operadores permitidos: + - * / ( ).
-4. Los precios deben ser realistas en Pesos Colombianos (COP). Por ejemplo: una consulta medica entre 50,000 y 150,000 COP, un servicio profesional entre 100,000 y 500,000 COP.
-5. Los valores en "opciones" deben ser strings numericos (ej: "50000", no 50000).
-6. Genera entre 2 y 4 pasos con 1-4 campos cada uno.
-7. Genera entre 1 y 3 reglas de precio que cubran el calculo completo.
-8. El slug debe ser kebab-case derivado del nombre.
-9. Los UUIDs de los pasos deben ser strings unicos tipo UUID v4.
-10. El campo "variables" en reglas_precio contiene constantes fijas (no campos del formulario). Los campos del formulario se referencian directamente por su ID en la formula.
+REGLAS CRITICAS:
+1. Tipos validos: "seleccion", "numero", "slider", "texto", "area_m2".
+2. IDs de campos: snake_case sin tildes ni ñ (ej: tipo_servicio, num_paginas). ESTOS IDs son las variables de las formulas.
+3. FORMULAS: SOLO pueden usar IDs de campos definidos en los pasos O nombres de variables fijas definidas en "variables". NUNCA uses un nombre que no este definido. Si el campo se llama "tipo_servicio", la formula debe decir "tipo_servicio", NO "precio_base" ni ningun otro nombre inventado.
+4. Las labels de las opciones NO deben mostrar precios. Solo descripcion del servicio. Ej: "Consulta general", NO "Consulta general ($80.000)". Los precios van SOLO en el campo "valor".
+5. Precios en la moneda que el usuario especifique. Si no especifica, usar Pesos Colombianos (COP). Precios realistas.
+6. Valores de opciones: strings numericos ("150000", no 150000).
+7. Genera 2-4 pasos, 1-3 campos por paso, 1-3 reglas de precio.
+8. VERIFICA que cada variable usada en las formulas exista como ID de campo o como key en "variables". Si la formula dice "cantidad * precio_unitario", debe existir un campo con id "cantidad" Y una variable fija "precio_unitario" en "variables" (o ambos como campos).
 
-RESPONDE UNICAMENTE con el JSON valido. Sin explicaciones, sin markdown, sin bloques de codigo. Solo el JSON puro."""
+EJEMPLO CORRECTO de formula:
+- Campo id: "tipo_servicio" (seleccion con valor "80000")
+- Campo id: "cantidad" (slider min 1 max 10)
+- Formula: "tipo_servicio * cantidad" (ambos son IDs de campos reales)
+
+EJEMPLO INCORRECTO:
+- Formula: "precio_base * cantidad" (ERROR: "precio_base" no es ID de ningun campo)
+
+RESPONDE SOLO con JSON valido. Sin explicaciones ni markdown."""

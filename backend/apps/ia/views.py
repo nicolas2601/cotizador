@@ -92,6 +92,13 @@ def _validar_estructura(data: dict) -> list[str]:
             if "id" not in campo:
                 errores.append(f"Paso {i}, campo {j}: requiere 'id'.")
 
+    # Recopilar IDs de campos validos
+    campo_ids = set()
+    for paso in pasos:
+        for campo in paso.get("campos", []):
+            if isinstance(campo, dict) and "id" in campo:
+                campo_ids.add(campo["id"])
+
     reglas = data.get("reglas_precio", [])
     if not isinstance(reglas, list) or len(reglas) == 0:
         errores.append("Debe tener al menos una regla de precio.")
@@ -100,9 +107,29 @@ def _validar_estructura(data: dict) -> list[str]:
             if not isinstance(regla, dict):
                 errores.append(f"La regla {i} debe ser un objeto.")
                 continue
-            for campo in CAMPOS_REQUERIDOS_REGLA:
-                if campo not in regla:
-                    errores.append(f"La regla {i} requiere '{campo}'.")
+            for campo_req in CAMPOS_REQUERIDOS_REGLA:
+                if campo_req not in regla:
+                    errores.append(f"La regla {i} requiere '{campo_req}'.")
+
+            # Validar que las variables de la formula existan
+            if "formula" in regla and "variables" in regla:
+                formula = regla["formula"]
+                variables_fijas = set(regla.get("variables", {}).keys())
+                variables_validas = campo_ids | variables_fijas
+
+                # Extraer nombres de variables de la formula
+                import re
+                vars_en_formula = set(re.findall(r"[a-zA-Z_]\w*", formula))
+                vars_invalidas = vars_en_formula - variables_validas
+
+                if vars_invalidas:
+                    # Auto-corregir: agregar variables faltantes como constantes
+                    for var in vars_invalidas:
+                        regla["variables"][var] = 1
+                    logger.warning(
+                        f"Regla {i}: variables {vars_invalidas} no existian como campos. "
+                        f"Agregadas como constantes con valor 1."
+                    )
 
     return errores
 

@@ -110,7 +110,9 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
         throw new Error(friendlyError(retryRes.status))
       }
 
-      return retryRes.json()
+      if (retryRes.status === 204) return {} as T
+      const retryText = await retryRes.text()
+      return retryText ? JSON.parse(retryText) : ({} as T)
     }
 
     // Refresh failed — error already handled in refreshAccessToken
@@ -121,5 +123,7 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
     throw new Error(friendlyError(res.status))
   }
 
-  return res.json()
+  if (res.status === 204) return {} as T
+  const text = await res.text()
+  return text ? JSON.parse(text) : ({} as T)
 }

@@ -7,7 +7,6 @@ import { Slider } from "@/components/ui/slider"
 
 import { useProspectFormStore } from "@/stores/prospect-form-store"
 import type { Campo } from "@/types/cotizador"
-import { formatCOP } from "@/lib/format"
 
 interface Props {
   campos: Campo[]
@@ -56,16 +55,11 @@ export function StepRenderer({ campos }: Props) {
             >
               {campo.opciones.map((opcion, i) => (
                 <label
-                  key={`${opcion.valor}-${i}`}
+                  key={`${campo.id}-${i}`}
                   className="flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition-all duration-200 hover:bg-primary/3 hover:border-primary/30 has-[data-state=checked]:border-primary has-[data-state=checked]:bg-primary/5 has-[data-state=checked]:shadow-sm has-[data-state=checked]:shadow-primary/10"
                 >
                   <RadioGroupItem value={opcion.valor} />
                   <span className="flex-1 text-sm">{opcion.label}</span>
-                  {opcion.valor && !isNaN(Number(opcion.valor)) && (
-                    <span className="text-xs font-semibold text-primary/70">
-                      {formatCOP(Number(opcion.valor))}
-                    </span>
-                  )}
                 </label>
               ))}
             </RadioGroup>
