@@ -4,7 +4,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import LoginSerializer, RegisterSerializer, UserProfileSerializer
+from .serializers import (
+    LoginSerializer,
+    NegocioSerializer,
+    RegisterSerializer,
+    UserProfileSerializer,
+)
 
 
 class RegisterView(APIView):
@@ -44,6 +49,17 @@ class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        return Response(UserProfileSerializer(request.user).data)
+
+
+class NegocioUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request):
+        negocio = request.user.negocio
+        serializer = NegocioSerializer(negocio, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(UserProfileSerializer(request.user).data)
 
 

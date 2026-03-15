@@ -2,18 +2,21 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { apiFetch } from "@/lib/api"
+import { useAuthStore } from "@/stores/auth-store"
 import type { Cotizacion, EstadoCotizacion } from "@/types/cotizacion"
 
-const TOKEN = "" // TODO: from auth context
-
 export function useCotizaciones() {
+  const token = useAuthStore((s) => s.token)
+
   return useQuery<Cotizacion[]>({
     queryKey: ["cotizaciones"],
-    queryFn: () => apiFetch("/cotizaciones/", { token: TOKEN }),
+    queryFn: () => apiFetch("/cotizaciones/", { token }),
+    enabled: !!token,
   })
 }
 
 export function useCambiarEstado() {
+  const token = useAuthStore((s) => s.token)
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -21,7 +24,7 @@ export function useCambiarEstado() {
       apiFetch(`/cotizaciones/${id}/estado/`, {
         method: "PATCH",
         body: JSON.stringify({ estado }),
-        token: TOKEN,
+        token,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cotizaciones"] })

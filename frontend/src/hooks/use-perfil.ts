@@ -2,18 +2,21 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { apiFetch } from "@/lib/api"
+import { useAuthStore } from "@/stores/auth-store"
 import type { UserProfile } from "@/types/negocio"
 
-const TOKEN = "" // TODO: from auth context
-
 export function usePerfil() {
+  const token = useAuthStore((s) => s.token)
+
   return useQuery<UserProfile>({
     queryKey: ["perfil"],
-    queryFn: () => apiFetch("/auth/me/", { token: TOKEN }),
+    queryFn: () => apiFetch("/auth/me/", { token }),
+    enabled: !!token,
   })
 }
 
 export function useActualizarNegocio() {
+  const token = useAuthStore((s) => s.token)
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -21,7 +24,7 @@ export function useActualizarNegocio() {
       apiFetch("/auth/me/negocio/", {
         method: "PATCH",
         body: JSON.stringify(data),
-        token: TOKEN,
+        token,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["perfil"] })
