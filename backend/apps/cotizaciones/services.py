@@ -10,7 +10,7 @@ from django.utils import timezone
 from weasyprint import HTML
 
 from apps.cotizadores.services import FormulaError, calcular_precio
-from apps.ia.client import OllamaCloudClient, OllamaCloudError
+from apps.ia.client import GroqClient, AIClientError
 from apps.ia.prompts import prompt_descripcion_propuesta
 
 from .models import Cotizacion
@@ -47,7 +47,7 @@ class CotizacionService:
 
     @staticmethod
     def generar_descripcion_ia(cotizacion: Cotizacion) -> str:
-        if not settings.OLLAMA_CLOUD_API_KEY:
+        if not settings.GROQ_API_KEY:
             logger.info("Ollama Cloud no configurado, omitiendo descripcion IA")
             return ""
 
@@ -64,7 +64,7 @@ class CotizacionService:
         }
 
         try:
-            client = OllamaCloudClient()
+            client = GroqClient()
             descripcion = client.chat_sync(
                 prompt=prompt_descripcion_propuesta(contexto),
                 system="Eres un asistente de ventas profesional para una agencia de software en Colombia.",
@@ -72,7 +72,7 @@ class CotizacionService:
             cotizacion.descripcion_ia = descripcion
             cotizacion.save(update_fields=["descripcion_ia"])
             return descripcion
-        except OllamaCloudError as e:
+        except AIClientError as e:
             logger.error(f"Error generando descripcion IA: {e}")
             return ""
 

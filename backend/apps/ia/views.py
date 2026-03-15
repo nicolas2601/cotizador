@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from apps.cotizadores.models import Cotizador, ReglaPrecio
 from apps.cotizadores.serializers import CotizadorSerializer
 
-from .client import OllamaCloudClient, OllamaCloudError
+from .client import GroqClient, AIClientError
 from .prompts import prompt_generar_cotizador
 
 logger = logging.getLogger(__name__)
@@ -126,22 +126,23 @@ class GenerarCotizadorView(APIView):
             )
 
         # Verificar que la IA esta configurada
-        if not getattr(settings, "OLLAMA_CLOUD_API_KEY", ""):
+        if not getattr(settings, "GROQ_API_KEY", ""):
             return Response(
                 {"detail": "El servicio de IA no esta configurado. Contacte al administrador."},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
-        # Generar el prompt y llamar a la IA
+        # Generar el prompt y llamar a Groq
         prompt = prompt_generar_cotizador(descripcion)
-        client = OllamaCloudClient()
+        client = GroqClient()
 
         try:
             respuesta_raw = client.chat_sync(
                 prompt=prompt,
                 system="Eres un asistente que genera configuraciones JSON para cotizadores de negocios colombianos. Responde UNICAMENTE con JSON valido.",
+                json_mode=True,
             )
-        except OllamaCloudError as e:
+        except AIClientError as e:
             logger.error(f"Error al comunicarse con la IA: {e}")
             return Response(
                 {"detail": f"Error con el servicio de IA: {str(e)}"},

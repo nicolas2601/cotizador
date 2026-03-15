@@ -220,8 +220,10 @@ EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="Tikno <noreply@tikno.pro>")
 
 # ==============================================================================
-# OLLAMA CLOUD (IA)
+# GROQ (IA) - LLM para generacion de cotizadores
 # ==============================================================================
-OLLAMA_CLOUD_API_KEY = config("OLLAMA_CLOUD_API_KEY", default="")
-OLLAMA_CLOUD_BASE_URL = config("OLLAMA_CLOUD_BASE_URL", default="https://api.ollama.com/v1")
-OLLAMA_MODEL = config("OLLAMA_MODEL", default="minimax-m2.5:cloud")
+GROQ_API_KEY = config("GROQ_API_KEY", default="")
+GROQ_MODEL = config("GROQ_MODEL", default="llama-3.3-70b-versatile")
+
+# Compatibilidad con config anterior
+OLLAMA_CLOUD_API_KEY = config("OLLAMA_CLOUD_API_KEY", default=GROQ_API_KEY)
