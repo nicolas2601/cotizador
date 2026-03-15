@@ -1,0 +1,23 @@
+# Environment
+.env
+.env.local
+.env.production
+
+# Python
+__pycache__/
+*.py[oc]
+*.egg-info/
+.venv/
+
+# Django
+*.sqlite3
+staticfiles/
+media/
+
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Markdown
+*.md
