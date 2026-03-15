@@ -30,14 +30,16 @@ def _procesar_en_background(cotizacion_id: str):
         CotizacionService.calcular_y_guardar_precio(cotizacion)
         CotizacionService.generar_descripcion_ia(cotizacion)
 
+        pdf_bytes = None
         try:
+            cotizacion.refresh_from_db()
             pdf_bytes = CotizacionService.generar_pdf(cotizacion)
             CotizacionService.subir_pdf_supabase(cotizacion, pdf_bytes)
         except Exception as e:
             logger.warning(f"PDF no generado: {e}")
 
         try:
-            CotizacionService.enviar_email_pdf(cotizacion)
+            CotizacionService.enviar_email_pdf(cotizacion, pdf_bytes=pdf_bytes)
         except Exception as e:
             logger.warning(f"Email no enviado: {e}")
 

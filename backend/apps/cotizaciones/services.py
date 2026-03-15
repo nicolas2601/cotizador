@@ -145,7 +145,7 @@ class CotizacionService:
             return ""
 
     @staticmethod
-    def enviar_email_pdf(cotizacion: Cotizacion) -> None:
+    def enviar_email_pdf(cotizacion: Cotizacion, pdf_bytes: bytes = None) -> None:
         if not cotizacion.prospecto_email:
             return
 
@@ -153,7 +153,6 @@ class CotizacionService:
         body = (
             f"Hola {cotizacion.prospecto_nombre},\n\n"
             f"Adjunto encontraras tu propuesta comercial de {cotizacion.negocio.nombre}.\n\n"
-            f"Total: ${cotizacion.total:,.0f} {cotizacion.moneda}\n\n"
             f"Quedamos atentos a tus comentarios.\n\n"
             f"Saludos,\n{cotizacion.negocio.nombre}"
         )
@@ -165,20 +164,17 @@ class CotizacionService:
             to=[cotizacion.prospecto_email],
         )
 
-        if cotizacion.pdf_url:
-            try:
-                pdf_bytes = CotizacionService.generar_pdf(cotizacion)
-                email.attach(
-                    f"propuesta-{cotizacion.id}.pdf",
-                    pdf_bytes,
-                    "application/pdf",
-                )
-            except Exception as e:
-                logger.error(f"Error adjuntando PDF al email: {e}")
+        if pdf_bytes:
+            email.attach(
+                f"propuesta-{cotizacion.negocio.slug}.pdf",
+                pdf_bytes,
+                "application/pdf",
+            )
 
         try:
             email.send()
             cotizacion.estado = Cotizacion.Estado.ENVIADA
             cotizacion.save(update_fields=["estado"])
+            logger.info(f"Email enviado a {cotizacion.prospecto_email}")
         except Exception as e:
             logger.error(f"Error enviando email: {e}")
