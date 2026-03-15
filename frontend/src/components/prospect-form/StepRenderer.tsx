@@ -54,9 +54,9 @@ export function StepRenderer({ campos }: Props) {
               onValueChange={(val) => setRespuesta(campo.id, val)}
               className="space-y-2"
             >
-              {campo.opciones.map((opcion) => (
+              {campo.opciones.map((opcion, i) => (
                 <label
-                  key={opcion.valor}
+                  key={`${opcion.valor}-${i}`}
                   className="flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition-all duration-200 hover:bg-primary/3 hover:border-primary/30 has-[data-state=checked]:border-primary has-[data-state=checked]:bg-primary/5 has-[data-state=checked]:shadow-sm has-[data-state=checked]:shadow-primary/10"
                 >
                   <RadioGroupItem value={opcion.valor} />
