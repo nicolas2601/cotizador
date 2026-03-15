@@ -12,4 +12,6 @@ urlpatterns = [
     path("me/", views.MeView.as_view(), name="me"),
     path("me/negocio/", views.NegocioUpdateView.as_view(), name="negocio-update"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("forgot-password/", views.ForgotPasswordView.as_view(), name="forgot-password"),
+    path("reset-password/", views.ResetPasswordView.as_view(), name="reset-password"),
 ]

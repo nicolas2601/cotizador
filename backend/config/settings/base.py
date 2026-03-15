@@ -125,6 +125,15 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "accounts.CustomUser"
 
 # ==============================================================================
+# CACHE (para codigos de recuperacion de contrasena)
+# ==============================================================================
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+    }
+}
+
+# ==============================================================================
 # DJANGO REST FRAMEWORK
 # ==============================================================================
 REST_FRAMEWORK = {

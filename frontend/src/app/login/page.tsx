@@ -88,7 +88,12 @@ export default function LoginPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-white/80">Contrasena</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="text-white/80">Contrasena</Label>
+                <a href="/recuperar" className="text-xs text-white/50 transition-colors hover:text-white/80">
+                  Olvide mi contrasena
+                </a>
+              </div>
               <Input
                 id="password"
                 type="password"
