@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Plus, ExternalLink, Pencil, Copy, Sparkles } from "lucide-react"
+import { Plus, ExternalLink, Pencil, Copy, Sparkles, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -40,6 +40,17 @@ export default function CotizadoresPage() {
     const url = `${window.location.origin}/c/${slug}`
     navigator.clipboard.writeText(url)
     toast.success("Link copiado al portapapeles")
+  }
+
+  async function eliminarCotizador(id: string, nombre: string) {
+    if (!confirm(`Eliminar "${nombre}"? Esta accion no se puede deshacer.`)) return
+    try {
+      await apiFetch(`/cotizadores/${id}/`, { method: "DELETE", token })
+      setCotizadores((prev) => prev.filter((c) => c.id !== id))
+      toast.success("Cotizador eliminado")
+    } catch (err: any) {
+      toast.error(err.message || "Error al eliminar")
+    }
   }
 
   return (
@@ -158,6 +169,15 @@ export default function CotizadoresPage() {
                       <Pencil className="mr-1.5 h-3.5 w-3.5" />
                       Editar
                     </a>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => eliminarCotizador(cot.id, cot.nombre)}
+                    title="Eliminar"
+                    className="cursor-pointer text-muted-foreground transition-colors duration-200 hover:text-destructive"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </CardContent>
