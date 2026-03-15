@@ -17,7 +17,7 @@ class OllamaCloudClient:
         self.base_url = settings.OLLAMA_CLOUD_BASE_URL
         self.model = settings.OLLAMA_MODEL
         self.max_retries = 3
-        self.timeout = 60
+        self.timeout = 120
 
     async def chat(self, prompt: str, system: str = "") -> str:
         messages = []
@@ -28,7 +28,10 @@ class OllamaCloudClient:
         last_error = None
         for attempt in range(self.max_retries):
             try:
-                async with httpx.AsyncClient(timeout=self.timeout) as client:
+                async with httpx.AsyncClient(
+                    timeout=self.timeout,
+                    follow_redirects=True,
+                ) as client:
                     response = await client.post(
                         f"{self.base_url}/chat/completions",
                         headers={
@@ -44,41 +47,47 @@ class OllamaCloudClient:
 
                 if response.status_code == 429:
                     wait = 2 ** attempt
-                    logger.warning(f"Rate limit alcanzado, reintentando en {wait}s...")
+                    logger.warning(f"Rate limit, reintentando en {wait}s...")
                     await asyncio.sleep(wait)
                     continue
 
-                if response.status_code >= 400:
+                if response.status_code == 401:
                     raise OllamaCloudError(
-                        f"Error API ({response.status_code}): {response.text}"
+                        "API key de Ollama Cloud invalida o expirada. "
+                        "Renuevala en https://ollama.com/settings"
                     )
 
+                if response.status_code >= 400:
+                    body = response.text[:200] if response.text else "sin cuerpo"
+                    raise OllamaCloudError(
+                        f"Error API ({response.status_code}): {body}"
+                    )
+
+                if not response.text:
+                    raise OllamaCloudError("Respuesta vacia de Ollama Cloud")
+
                 data = response.json()
+
+                if "choices" not in data or not data["choices"]:
+                    raise OllamaCloudError(f"Respuesta sin choices: {str(data)[:200]}")
+
                 return data["choices"][0]["message"]["content"]
 
-            except httpx.TimeoutException:
-                last_error = OllamaCloudError("Timeout al conectar con Ollama Cloud")
-                wait = 2 ** attempt
-                logger.warning(f"Timeout, reintentando en {wait}s (intento {attempt + 1}/{self.max_retries})")
-                await asyncio.sleep(wait)
-
-            except httpx.HTTPError as e:
+            except (httpx.TimeoutException, httpx.ConnectError) as e:
                 last_error = OllamaCloudError(f"Error de conexion: {str(e)}")
                 wait = 2 ** attempt
-                logger.warning(f"Error HTTP, reintentando en {wait}s")
+                logger.warning(f"Conexion fallida, reintentando en {wait}s (intento {attempt + 1})")
                 await asyncio.sleep(wait)
+
+            except OllamaCloudError:
+                raise
+
+            except Exception as e:
+                last_error = OllamaCloudError(f"Error inesperado: {str(e)}")
+                logger.error(f"Error inesperado en Ollama: {e}")
+                break
 
         raise last_error or OllamaCloudError("Error desconocido tras reintentos")
 
     def chat_sync(self, prompt: str, system: str = "") -> str:
-        try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                import concurrent.futures
-                with concurrent.futures.ThreadPoolExecutor() as pool:
-                    return pool.submit(
-                        asyncio.run, self.chat(prompt, system)
-                    ).result()
-            return loop.run_until_complete(self.chat(prompt, system))
-        except RuntimeError:
-            return asyncio.run(self.chat(prompt, system))
+        return asyncio.run(self.chat(prompt, system))

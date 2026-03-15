@@ -144,7 +144,7 @@ class GenerarCotizadorView(APIView):
         except OllamaCloudError as e:
             logger.error(f"Error al comunicarse con la IA: {e}")
             return Response(
-                {"detail": "Error al comunicarse con el servicio de IA. Intente nuevamente."},
+                {"detail": f"Error con el servicio de IA: {str(e)}"},
                 status=status.HTTP_502_BAD_GATEWAY,
             )
 
