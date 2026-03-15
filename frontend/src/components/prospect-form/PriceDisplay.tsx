@@ -45,7 +45,7 @@ export function PriceDisplay({ cotizador }: Props) {
           cotizador.negocio_nombre?.toLowerCase().replace(/\s+/g, "-") || "tikno"
 
         const res = await fetch(
-          `${API_URL}/public/${negocioSlug}/${cotizador.slug}/cotizar/`,
+          `${API_URL}/public/${negocioSlug}/${cotizador.slug}/preview/`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
