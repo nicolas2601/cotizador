@@ -5,8 +5,6 @@ from .models import CustomUser, Negocio
 
 
 class NegocioSerializer(serializers.ModelSerializer):
-    logo_url = serializers.ReadOnlyField()
-
     class Meta:
         model = Negocio
         fields = [

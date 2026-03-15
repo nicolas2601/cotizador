@@ -45,7 +45,7 @@ class Negocio(BaseModel):
     )
     nombre = models.CharField("nombre del negocio", max_length=255)
     slug = models.SlugField(unique=True, max_length=255)
-    logo = models.ImageField(upload_to="negocios/logos/", blank=True)
+    logo_url = models.URLField("URL del logo", blank=True, default="")
     telefono = models.CharField(max_length=20, blank=True)
     direccion = models.TextField(blank=True)
     sitio_web = models.URLField(blank=True)
@@ -59,9 +59,3 @@ class Negocio(BaseModel):
 
     def __str__(self):
         return self.nombre
-
-    @property
-    def logo_url(self):
-        if self.logo:
-            return self.logo.url
-        return ""

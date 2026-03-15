@@ -41,6 +41,7 @@ export default function ConfiguracionPage() {
         color_primario: colorPrimario,
         telefono,
         sitio_web: sitioWeb,
+        logo_url: logoUrl,
       },
       {
         onSuccess: () => toast.success("Configuracion guardada"),
