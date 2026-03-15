@@ -8,6 +8,14 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { useAuthStore } from "@/stores/auth-store"
 import { apiFetch } from "@/lib/api"
 import { AIGeneratorDialog } from "@/components/form-builder/AIGeneratorDialog"
@@ -17,6 +25,8 @@ export default function CotizadoresPage() {
   const [cotizadores, setCotizadores] = useState<Cotizador[]>([])
   const [negocioSlug, setNegocioSlug] = useState("")
   const [loading, setLoading] = useState(true)
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; nombre: string } | null>(null)
+  const [deleting, setDeleting] = useState(false)
   const token = useAuthStore((s) => s.token)
 
   useEffect(() => {
@@ -51,14 +61,19 @@ export default function CotizadoresPage() {
     toast.success("Link copiado al portapapeles")
   }
 
-  async function eliminarCotizador(id: string, nombre: string) {
-    if (!confirm(`Eliminar "${nombre}"? Esta accion no se puede deshacer.`)) return
+  async function confirmarEliminar() {
+    if (!deleteTarget) return
+    setDeleting(true)
     try {
-      await apiFetch(`/cotizadores/${id}/`, { method: "DELETE", token })
-      setCotizadores((prev) => prev.filter((c) => c.id !== id))
+      await apiFetch(`/cotizadores/${deleteTarget.id}/`, { method: "DELETE", token })
+      setCotizadores((prev) => prev.filter((c) => c.id !== deleteTarget.id))
       toast.success("Cotizador eliminado")
-    } catch (err: any) {
-      toast.error(err.message || "Error al eliminar")
+      setDeleteTarget(null)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Error al eliminar"
+      toast.error(message)
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -182,7 +197,7 @@ export default function CotizadoresPage() {
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    onClick={() => eliminarCotizador(cot.id, cot.nombre)}
+                    onClick={() => setDeleteTarget({ id: cot.id, nombre: cot.nombre })}
                     title="Eliminar"
                     className="cursor-pointer text-muted-foreground transition-colors duration-200 hover:text-destructive"
                   >
@@ -194,6 +209,26 @@ export default function CotizadoresPage() {
           ))}
         </div>
       )}
+
+      {/* Delete confirmation dialog */}
+      <Dialog open={deleteTarget !== null} onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Eliminar cotizador</DialogTitle>
+            <DialogDescription>
+              Esta seguro de eliminar &ldquo;{deleteTarget?.nombre}&rdquo;? Se eliminaran todas las cotizaciones asociadas.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleting} className="cursor-pointer">
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={confirmarEliminar} disabled={deleting} className="cursor-pointer">
+              {deleting ? "Eliminando..." : "Eliminar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

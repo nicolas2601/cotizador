@@ -48,6 +48,22 @@ async function refreshAccessToken(): Promise<string | null> {
   }
 }
 
+function friendlyError(status: number): string {
+  switch (status) {
+    case 401:
+      return "Tu sesion expiro"
+    case 403:
+      return "No tienes permiso"
+    case 404:
+      return "No encontrado"
+    case 429:
+      return "Demasiados intentos, espera un momento"
+    default:
+      if (status >= 500) return "Error del servidor, intenta de nuevo"
+      return "Ocurrio un error, intenta de nuevo"
+  }
+}
+
 export async function apiFetch<T>(path: string, options: FetchOptions = {}): Promise<T> {
   const { token, headers: customHeaders, ...rest } = options
 
@@ -60,7 +76,12 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
     headers["Authorization"] = `Bearer ${token}`
   }
 
-  const res = await fetch(`${API_URL}${path}`, { headers, ...rest })
+  let res: Response
+  try {
+    res = await fetch(`${API_URL}${path}`, { headers, ...rest })
+  } catch {
+    throw new Error("Error de conexion, verifica tu internet")
+  }
 
   // If 401 and we have a token, attempt refresh
   if (res.status === 401 && token) {
@@ -78,23 +99,26 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
     if (newToken) {
       // Retry the original request with the new token
       headers["Authorization"] = `Bearer ${newToken}`
-      const retryRes = await fetch(`${API_URL}${path}`, { headers, ...rest })
+      let retryRes: Response
+      try {
+        retryRes = await fetch(`${API_URL}${path}`, { headers, ...rest })
+      } catch {
+        throw new Error("Error de conexion, verifica tu internet")
+      }
 
       if (!retryRes.ok) {
-        const error = await retryRes.json().catch(() => ({ detail: "Error de conexion" }))
-        throw new Error(error.detail || `Error ${retryRes.status}`)
+        throw new Error(friendlyError(retryRes.status))
       }
 
       return retryRes.json()
     }
 
     // Refresh failed — error already handled in refreshAccessToken
-    throw new Error("Sesion expirada. Por favor inicia sesion de nuevo.")
+    throw new Error("Tu sesion expiro")
   }
 
   if (!res.ok) {
-    const error = await res.json().catch(() => ({ detail: "Error de conexion" }))
-    throw new Error(error.detail || `Error ${res.status}`)
+    throw new Error(friendlyError(res.status))
   }
 
   return res.json()

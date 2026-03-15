@@ -11,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useProspectFormStore } from "@/stores/prospect-form-store"
 import type { CotizadorPublico } from "@/types/cotizador"
 import { StepRenderer } from "./StepRenderer"
-import { PriceDisplay } from "./PriceDisplay"
 import { ContactStep } from "./ContactStep"
 
 interface Props {
@@ -82,11 +81,23 @@ export function MultiStepForm({ cotizador }: Props) {
         }
       )
 
-      if (!res.ok) throw new Error("Error al enviar")
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        console.error("Error al enviar cotizacion:", res.status, body)
+
+        if (res.status === 429) {
+          toast.error("Demasiados intentos. Espera un momento e intenta de nuevo.")
+        } else if (res.status === 404) {
+          toast.error("Cotizador no encontrado. Verifica el enlace.")
+        } else {
+          toast.error("No se pudo enviar la cotizacion. Intenta de nuevo.")
+        }
+        return
+      }
 
       useProspectFormStore.getState().setEnviado(true)
     } catch {
-      toast.error("No se pudo enviar la cotizacion. Intenta de nuevo.")
+      toast.error("Error de conexion. Verifica tu internet e intenta de nuevo.")
     } finally {
       setSending(false)
     }
@@ -178,9 +189,6 @@ export function MultiStepForm({ cotizador }: Props) {
             </CardContent>
           </Card>
         </div>
-
-        {/* Price display */}
-        <PriceDisplay cotizador={cotizador} />
 
         {/* Navigation */}
         <div className="mt-6 flex items-center justify-between">
