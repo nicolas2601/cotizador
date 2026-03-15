@@ -5,6 +5,7 @@ import { Upload, X, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
+import { supabase } from "@/lib/supabase"
 
 interface Props {
   currentUrl: string
@@ -33,20 +34,25 @@ export function LogoUpload({ currentUrl, onUploaded }: Props) {
       setUploading(true)
 
       try {
-        // TODO: upload to Supabase Storage
-        // const { data, error } = await supabase.storage
-        //   .from("media")
-        //   .upload(`negocios/logos/${Date.now()}-${file.name}`, file)
-        // if (error) throw error
-        // const url = supabase.storage.from("media").getPublicUrl(data.path).data.publicUrl
-        // onUploaded(url)
+        const ext = file.name.split(".").pop() || "png"
+        const fileName = `negocios/logos/${Date.now()}.${ext}`
 
-        // Simulate upload for now
-        await new Promise((r) => setTimeout(r, 1000))
-        onUploaded(objectUrl)
+        const { data, error } = await supabase.storage
+          .from("media")
+          .upload(fileName, file, { upsert: true })
+
+        if (error) throw error
+
+        const { data: urlData } = supabase.storage
+          .from("media")
+          .getPublicUrl(data.path)
+
+        const publicUrl = urlData.publicUrl
+        setPreview(publicUrl)
+        onUploaded(publicUrl)
         toast.success("Logo subido correctamente")
-      } catch {
-        toast.error("Error al subir el logo")
+      } catch (err: any) {
+        toast.error(err?.message || "Error al subir el logo")
         setPreview(currentUrl)
       } finally {
         setUploading(false)
