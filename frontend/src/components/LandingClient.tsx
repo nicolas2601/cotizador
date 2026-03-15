@@ -113,9 +113,25 @@ export default function LandingClient() {
 
       {/* --- HERO SECTION --- */}
       <section ref={heroRef} className="relative min-h-[110vh] flex items-center justify-center pt-20 overflow-hidden z-10">
+        {/* Video Background Container */}
+        <div className="absolute inset-0 z-0">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover opacity-30 mix-blend-lighten scale-110"
+          >
+            <source src="/hero.mp4" type="video/mp4" />
+          </video>
+          {/* Overlays to ensure legibility and integration */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#020617] via-transparent to-[#020617]" />
+          <div className="absolute inset-0 bg-[#020617]/20 backdrop-blur-[2px]" />
+        </div>
+
         <motion.div 
           style={{ y: heroY, opacity: heroOpacity, scale: heroScale }}
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10"
         >
           <motion.div 
             initial={{ opacity: 0, y: -20 }}

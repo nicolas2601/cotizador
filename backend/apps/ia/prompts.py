@@ -1,21 +1,27 @@
 def prompt_descripcion_propuesta(contexto: dict) -> str:
     return f"""Genera una descripcion profesional en espanol para una propuesta comercial.
 
-Datos del negocio: {contexto.get('negocio_nombre', 'N/A')}
-Servicio cotizado: {contexto.get('cotizador_nombre', 'N/A')}
-Descripcion del cotizador: {contexto.get('cotizador_descripcion', 'N/A')}
+Negocio: {contexto.get('negocio_nombre', 'N/A')}
+Servicio: {contexto.get('cotizador_nombre', 'N/A')}
+Descripcion: {contexto.get('cotizador_descripcion', 'N/A')}
 
-Respuestas del cliente:
+Lo que el cliente selecciono:
 {_formatear_respuestas(contexto.get('respuestas', {}))}
 
-Precio total: ${contexto.get('total', 0):,.0f} COP
+Escribe EXACTAMENTE 3 parrafos separados por lineas vacias:
 
-Escribe 2-3 parrafos describiendo:
-1. Que incluye el servicio segun las opciones seleccionadas
-2. El valor que aporta al cliente
-3. Plazos estimados y entregables
+Parrafo 1: Que incluye el servicio segun lo que el cliente selecciono. Se especifico con los productos/servicios elegidos.
 
-Tono profesional pero cercano. No uses markdown, solo texto plano."""
+Parrafo 2: El proceso de trabajo y tiempos estimados de entrega. Que puede esperar el cliente.
+
+Parrafo 3: El valor que esto aporta al negocio del cliente. Por que es una buena inversion.
+
+REGLAS:
+- Tono profesional pero cercano y directo
+- NO uses markdown, viñetas ni listas. Solo parrafos de texto plano
+- NO menciones precios ni montos
+- Cada parrafo debe tener 2-3 oraciones maximo
+- Separa los parrafos con una linea vacia"""
 
 
 def prompt_sugerir_precio(contexto: dict) -> str:
@@ -49,30 +55,44 @@ def _formatear_desglose(desglose: list) -> str:
 
 
 def prompt_generar_cotizador(descripcion: str) -> str:
-    return f"""Eres un experto en crear cotizadores para negocios. El usuario describe su negocio:
+    return f"""Eres un experto en crear formularios de cotizacion para negocios. Tu trabajo es pensar como un vendedor experimentado que sabe que preguntas hacerle al cliente para poder calcular un precio justo.
 
+El usuario describe su negocio:
 "{descripcion}"
 
-Genera un JSON para un cotizador automatico. Estructura EXACTA:
+PIENSA COMO VENDEDOR: que necesitas saber del cliente para darle un precio?
+- Que producto o servicio quiere? (seleccion con opciones claras)
+- Que tamano, cantidad o dimensiones? (slider o numero)
+- Que materiales o calidad? (seleccion con opciones que afectan precio)
+- Quiere extras opcionales? (seleccion: se agregan al precio base)
+
+REGLAS PARA LAS PREGUNTAS:
+- Las preguntas deben ser naturales, como si un vendedor le preguntara al cliente en persona
+- NO preguntes cosas obvias como "quieres diseno profesional si/no" -- si el cliente cotiza, obviamente quiere calidad
+- Las opciones de seleccion deben tener nombres descriptivos SIN precios visibles
+- Cada opcion tiene un valor numerico interno que el cliente NO ve
+- Los extras se suman al precio base, no se preguntan como si/no
+
+Genera un JSON con esta estructura EXACTA:
 
 {{
-  "nombre": "Nombre del cotizador",
-  "slug": "slug-kebab-case",
-  "descripcion": "Descripcion breve",
+  "nombre": "Nombre descriptivo del cotizador",
+  "slug": "slug-kebab-case-sin-tildes",
+  "descripcion": "Frase corta que invite al cliente a cotizar",
   "moneda": "COP",
   "configuracion": {{
     "pasos": [
       {{
         "id": "paso-1",
         "titulo": "Titulo del paso",
-        "descripcion": "Que se pregunta",
+        "descripcion": "Instruccion breve para el cliente",
         "campos": [
           {{
-            "id": "tipo_servicio",
+            "id": "identificador_snake_case",
             "tipo": "seleccion",
-            "label": "Que servicio necesitas?",
+            "label": "Pregunta natural al cliente",
             "requerido": true,
-            "opciones": [{{"label": "Servicio basico", "valor": "150000"}}, {{"label": "Servicio premium", "valor": "350000"}}],
+            "opciones": [{{"label": "Opcion descriptiva", "valor": "150000"}}],
             "min": null, "max": null, "step": null, "unidad": null
           }}
         ]
@@ -81,30 +101,29 @@ Genera un JSON para un cotizador automatico. Estructura EXACTA:
   }},
   "reglas_precio": [
     {{
-      "nombre": "Precio del servicio",
-      "formula": "tipo_servicio",
+      "nombre": "Nombre de la regla",
+      "formula": "campo_id_1 + campo_id_2",
       "variables": {{}},
       "prioridad": 0
     }}
   ]
 }}
 
-REGLAS CRITICAS:
-1. Tipos validos: "seleccion", "numero", "slider", "texto", "area_m2".
-2. IDs de campos: snake_case sin tildes ni ñ (ej: tipo_servicio, num_paginas). ESTOS IDs son las variables de las formulas.
-3. FORMULAS: SOLO pueden usar IDs de campos definidos en los pasos O nombres de variables fijas definidas en "variables". NUNCA uses un nombre que no este definido. Si el campo se llama "tipo_servicio", la formula debe decir "tipo_servicio", NO "precio_base" ni ningun otro nombre inventado.
-4. Las labels de las opciones NO deben mostrar precios. Solo descripcion del servicio. Ej: "Consulta general", NO "Consulta general ($80.000)". Los precios van SOLO en el campo "valor".
-5. Precios en la moneda que el usuario especifique. Si no especifica, usar Pesos Colombianos (COP). Precios realistas.
-6. Valores de opciones: strings numericos ("150000", no 150000).
-7. Genera 2-4 pasos, 1-3 campos por paso, 1-3 reglas de precio.
-8. VERIFICA que cada variable usada en las formulas exista como ID de campo o como key en "variables". Si la formula dice "cantidad * precio_unitario", debe existir un campo con id "cantidad" Y una variable fija "precio_unitario" en "variables" (o ambos como campos).
+REGLAS TECNICAS:
+1. Tipos: "seleccion", "numero", "slider", "texto", "area_m2"
+2. IDs: snake_case sin tildes ni ñ. Estos IDs son las variables de las formulas
+3. FORMULAS: SOLO usan IDs de campos reales o keys de "variables". NUNCA inventes nombres
+4. Labels de opciones: SOLO texto descriptivo, NUNCA precios. Ej: "Aviso luminoso grande", NO "Aviso luminoso ($500.000)"
+5. Valores de opciones: strings numericos ("150000")
+6. Genera 2-4 pasos, 1-3 campos por paso
+7. Precios realistas en COP (o la moneda que el usuario indique)
+8. Para extras opcionales: usa seleccion con una opcion "Sin extras" con valor "0"
+9. Cada campo que afecte el precio debe tener un valor numerico como "valor" en las opciones
 
-EJEMPLO CORRECTO de formula:
-- Campo id: "tipo_servicio" (seleccion con valor "80000")
-- Campo id: "cantidad" (slider min 1 max 10)
-- Formula: "tipo_servicio * cantidad" (ambos son IDs de campos reales)
+EJEMPLO para una imprenta:
+- Paso 1 "Que necesitas?": tipo_producto (seleccion: "Tarjetas de presentacion"="45000", "Volantes"="35000")
+- Paso 2 "Cantidad": cantidad (slider min:100 max:5000 step:100)
+- Paso 3 "Acabados": acabado (seleccion: "Estandar"="0", "Plastificado UV"="25000")
+- Regla: "tipo_producto + acabado" (el precio ya incluye la cantidad base)
 
-EJEMPLO INCORRECTO:
-- Formula: "precio_base * cantidad" (ERROR: "precio_base" no es ID de ningun campo)
-
-RESPONDE SOLO con JSON valido. Sin explicaciones ni markdown."""
+RESPONDE SOLO con JSON valido."""

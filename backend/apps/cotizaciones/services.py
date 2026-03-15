@@ -95,6 +95,9 @@ class CotizacionService:
             "prospecto_telefono": cotizacion.prospecto_telefono,
             "prospecto_empresa": cotizacion.prospecto_empresa,
             "descripcion_ia": cotizacion.descripcion_ia,
+            "descripcion_parrafos": [
+                p.strip() for p in cotizacion.descripcion_ia.split("\n") if p.strip()
+            ] if cotizacion.descripcion_ia else [],
             "desglose": desglose_display,
             "total": float(cotizacion.total),
             "moneda": cotizacion.moneda,
