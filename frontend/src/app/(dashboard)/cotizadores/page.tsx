@@ -15,6 +15,7 @@ import type { Cotizador } from "@/types/cotizador"
 
 export default function CotizadoresPage() {
   const [cotizadores, setCotizadores] = useState<Cotizador[]>([])
+  const [negocioSlug, setNegocioSlug] = useState("")
   const [loading, setLoading] = useState(true)
   const token = useAuthStore((s) => s.token)
 
@@ -23,6 +24,11 @@ export default function CotizadoresPage() {
       setLoading(false)
       return
     }
+    // Cargar negocio slug
+    apiFetch<{ negocio: { slug: string } }>("/auth/me/", { token })
+      .then((data) => setNegocioSlug(data.negocio?.slug || ""))
+      .catch(() => {})
+
     apiFetch<Cotizador[] | { results: Cotizador[] }>("/cotizadores/", { token })
       .then((data) => {
         setCotizadores(Array.isArray(data) ? data : data.results || [])
@@ -36,9 +42,12 @@ export default function CotizadoresPage() {
       })
   }, [token])
 
-  function copiarLink(slug: string) {
-    const url = `${window.location.origin}/c/${slug}`
-    navigator.clipboard.writeText(url)
+  function getPublicUrl(cotSlug: string) {
+    return `${window.location.origin}/q/${negocioSlug}--${cotSlug}`
+  }
+
+  function copiarLink(cotSlug: string) {
+    navigator.clipboard.writeText(getPublicUrl(cotSlug))
     toast.success("Link copiado al portapapeles")
   }
 
@@ -148,7 +157,7 @@ export default function CotizadoresPage() {
               <CardContent>
                 <div className="flex items-center gap-2">
                   <p className="flex-1 truncate rounded-md bg-muted/60 px-2.5 py-1.5 font-mono text-xs text-muted-foreground">
-                    /c/{cot.slug}
+                    /q/{negocioSlug}--{cot.slug}
                   </p>
                   <Button
                     variant="ghost"
@@ -160,7 +169,7 @@ export default function CotizadoresPage() {
                     <Copy className="h-3.5 w-3.5" />
                   </Button>
                   <Button variant="ghost" size="icon-sm" asChild title="Ver publico" className="cursor-pointer transition-colors duration-200 hover:text-primary">
-                    <a href={`/c/${cot.slug}`} target="_blank" rel="noopener">
+                    <a href={`/q/${negocioSlug}--${cot.slug}`} target="_blank" rel="noopener">
                       <ExternalLink className="h-3.5 w-3.5" />
                     </a>
                   </Button>
