@@ -17,7 +17,8 @@ import type { CampoTipo, Paso } from "@/types/cotizador"
 const TIPOS_CAMPO: { value: CampoTipo; label: string }[] = [
   { value: "texto", label: "Texto" },
   { value: "numero", label: "Numero" },
-  { value: "seleccion", label: "Seleccion" },
+  { value: "seleccion", label: "Seleccion unica" },
+  { value: "multiple", label: "Seleccion multiple" },
   { value: "area_m2", label: "Area (m2)" },
   { value: "slider", label: "Slider" },
 ]

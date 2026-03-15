@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from .models import Cotizador, ReglaPrecio
 
-TIPOS_CAMPO_VALIDOS = {"texto", "numero", "seleccion", "area_m2", "slider"}
+TIPOS_CAMPO_VALIDOS = {"texto", "numero", "seleccion", "multiple", "area_m2", "slider"}
 
 
 class ReglaPrecioSerializer(serializers.ModelSerializer):

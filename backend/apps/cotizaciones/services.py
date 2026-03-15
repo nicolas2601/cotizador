@@ -83,13 +83,18 @@ class CotizacionService:
             for d in cotizacion.desglose_precio
         ]
 
+        negocio = cotizacion.negocio
         contexto = {
-            "negocio_nombre": cotizacion.negocio.nombre,
-            "negocio_logo": cotizacion.negocio.logo_url,
-            "color_primario": cotizacion.negocio.color_primario or "#000000",
+            "negocio_nombre": negocio.nombre,
+            "negocio_logo": negocio.logo_url,
+            "negocio_telefono": negocio.telefono,
+            "negocio_email": negocio.owner.email,
+            "negocio_web": negocio.sitio_web,
+            "negocio_direccion": negocio.direccion,
+            "color_primario": negocio.color_primario or "#800080",
             "cotizador_nombre": cotizacion.cotizador.nombre,
             "cotizacion_id": str(cotizacion.id),
-            "fecha": timezone.now().strftime("%d/%m/%Y"),
+            "fecha": timezone.now().strftime("%d de %B de %Y"),
             "prospecto_nombre": cotizacion.prospecto_nombre,
             "prospecto_email": cotizacion.prospecto_email,
             "prospecto_telefono": cotizacion.prospecto_telefono,
@@ -98,7 +103,9 @@ class CotizacionService:
             "descripcion_parrafos": [
                 p.strip() for p in cotizacion.descripcion_ia.split("\n") if p.strip()
             ] if cotizacion.descripcion_ia else [],
+            "respuestas": cotizacion.respuestas,
             "desglose": desglose_display,
+            "subtotal": float(cotizacion.subtotal),
             "total": float(cotizacion.total),
             "moneda": cotizacion.moneda,
         }

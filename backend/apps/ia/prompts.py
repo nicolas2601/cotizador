@@ -1,27 +1,30 @@
 def prompt_descripcion_propuesta(contexto: dict) -> str:
-    return f"""Genera una descripcion profesional en espanol para una propuesta comercial.
+    return f"""Eres el director comercial de {contexto.get('negocio_nombre', 'una empresa')}. Escribe la seccion descriptiva de una propuesta comercial profesional para un cliente.
 
-Negocio: {contexto.get('negocio_nombre', 'N/A')}
-Servicio: {contexto.get('cotizador_nombre', 'N/A')}
-Descripcion: {contexto.get('cotizador_descripcion', 'N/A')}
+Servicio cotizado: {contexto.get('cotizador_nombre', 'N/A')}
+Sobre el negocio: {contexto.get('cotizador_descripcion', 'N/A')}
 
-Lo que el cliente selecciono:
+Lo que el cliente solicito:
 {_formatear_respuestas(contexto.get('respuestas', {}))}
 
-Escribe EXACTAMENTE 3 parrafos separados por lineas vacias:
+Escribe EXACTAMENTE 4 parrafos cortos separados por lineas vacias:
 
-Parrafo 1: Que incluye el servicio segun lo que el cliente selecciono. Se especifico con los productos/servicios elegidos.
+Parrafo 1 - ALCANCE: Describe con detalle que incluye el servicio basandote en lo que el cliente selecciono. Menciona los entregables concretos que recibira.
 
-Parrafo 2: El proceso de trabajo y tiempos estimados de entrega. Que puede esperar el cliente.
+Parrafo 2 - PROCESO: Explica el proceso de trabajo paso a paso. Como se desarrolla el proyecto, cuantas etapas tiene, que necesitas del cliente para arrancar.
 
-Parrafo 3: El valor que esto aporta al negocio del cliente. Por que es una buena inversion.
+Parrafo 3 - TIEMPOS: Indica tiempos estimados de entrega realistas. Menciona hitos intermedios si aplica (primera revision, entrega parcial, entrega final).
 
-REGLAS:
-- Tono profesional pero cercano y directo
-- NO uses markdown, viñetas ni listas. Solo parrafos de texto plano
-- NO menciones precios ni montos
-- Cada parrafo debe tener 2-3 oraciones maximo
-- Separa los parrafos con una linea vacia"""
+Parrafo 4 - GARANTIA: Que garantias ofreces. Revisiones incluidas, soporte post-entrega, compromiso de calidad.
+
+REGLAS ESTRICTAS:
+- Tono profesional, seguro y directo. Como un experto que sabe lo que hace
+- NO uses markdown, viñetas, listas ni asteriscos. Solo texto plano en parrafos
+- NO menciones precios, montos ni valores monetarios
+- Cada parrafo: 2-4 oraciones claras y concretas
+- Usa lenguaje que genere confianza: "nuestro equipo", "garantizamos", "nos comprometemos"
+- NO uses frases genericas vacias. Se especifico con el servicio que el cliente pidio
+- Separa cada parrafo con exactamente una linea vacia"""
 
 
 def prompt_sugerir_precio(contexto: dict) -> str:
@@ -110,14 +113,14 @@ Genera un JSON con esta estructura EXACTA:
 }}
 
 REGLAS TECNICAS:
-1. Tipos: "seleccion", "numero", "slider", "texto", "area_m2"
+1. Tipos: "seleccion" (una opcion), "multiple" (varias opciones, se suman los valores), "numero", "slider", "texto", "area_m2"
 2. IDs: snake_case sin tildes ni ñ. Estos IDs son las variables de las formulas
 3. FORMULAS: SOLO usan IDs de campos reales o keys de "variables". NUNCA inventes nombres
 4. Labels de opciones: SOLO texto descriptivo, NUNCA precios. Ej: "Aviso luminoso grande", NO "Aviso luminoso ($500.000)"
 5. Valores de opciones: strings numericos ("150000")
 6. Genera 2-4 pasos, 1-3 campos por paso
 7. Precios realistas en COP (o la moneda que el usuario indique)
-8. Para extras opcionales: usa seleccion con una opcion "Sin extras" con valor "0"
+8. Para extras opcionales: usa tipo "multiple" (checkboxes, el cliente puede elegir varios). Los valores se SUMAN automaticamente
 9. Cada campo que afecte el precio debe tener un valor numerico como "valor" en las opciones
 
 EJEMPLO para una imprenta:

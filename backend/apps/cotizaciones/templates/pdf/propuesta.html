@@ -4,153 +4,330 @@
 <head>
 <meta charset="UTF-8">
 <style>
-    @page { size: letter; margin: 2cm; }
+    @page { size: letter; margin: 1.8cm 2cm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        color: #1a1a1a;
-        font-size: 10.5pt;
-        line-height: 1.6;
+        color: #2d2d2d;
+        font-size: 10pt;
+        line-height: 1.55;
     }
+
+    /* === HEADER === */
     .header {
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;
-        border-bottom: 3px solid {{ color_primario }};
-        padding-bottom: 16px;
-        margin-bottom: 24px;
+        align-items: center;
+        padding-bottom: 14px;
+        margin-bottom: 20px;
+        border-bottom: 2px solid {{ color_primario }};
     }
-    .header-logo img { max-height: 50px; }
-    .header-info { text-align: right; }
-    .header-info h1 { font-size: 18pt; color: {{ color_primario }}; margin-bottom: 2px; }
-    .header-info p { color: #888; font-size: 8.5pt; }
-    .seccion { margin-bottom: 20px; }
+    .header-logo img { max-height: 44px; }
+    .header-brand { font-size: 18pt; font-weight: 700; color: {{ color_primario }}; }
+    .header-right { text-align: right; }
+    .header-right .titulo { font-size: 16pt; font-weight: 700; color: {{ color_primario }}; }
+    .header-right .meta { font-size: 8pt; color: #999; margin-top: 2px; }
+
+    /* === GRID DOS COLUMNAS === */
+    .grid-2 {
+        display: flex;
+        gap: 24px;
+        margin-bottom: 18px;
+    }
+    .grid-2 .col { flex: 1; }
+
+    /* === CARDS === */
+    .card {
+        border: 1px solid #e8e8e8;
+        border-radius: 6px;
+        padding: 12px 14px;
+        margin-bottom: 16px;
+    }
+    .card-header {
+        font-size: 8pt;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: {{ color_primario }};
+        margin-bottom: 8px;
+        padding-bottom: 4px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .card-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 2px 0;
+        font-size: 9.5pt;
+    }
+    .card-label { color: #888; }
+    .card-value { font-weight: 500; text-align: right; max-width: 60%; }
+
+    /* === SECCION === */
+    .seccion { margin-bottom: 16px; }
     .seccion-titulo {
-        font-size: 11pt; font-weight: 600; color: {{ color_primario }};
-        border-bottom: 1px solid #eee; padding-bottom: 4px; margin-bottom: 10px;
+        font-size: 10pt;
+        font-weight: 700;
+        color: {{ color_primario }};
+        margin-bottom: 8px;
+        padding-bottom: 3px;
+        border-bottom: 1px solid #eee;
     }
-    .info-row { display: flex; padding: 3px 0; font-size: 10pt; }
-    .info-label { width: 120px; color: #666; flex-shrink: 0; }
-    .info-value { font-weight: 500; }
-    .descripcion-box {
-        background: #f9f9f9; border-left: 3px solid {{ color_primario }};
-        padding: 14px 16px; margin-top: 8px; font-size: 10pt; line-height: 1.7;
+
+    /* === DESCRIPCION IA === */
+    .descripcion {
+        background: #fafafa;
+        border-left: 3px solid {{ color_primario }};
+        padding: 12px 14px;
+        font-size: 9.5pt;
+        line-height: 1.65;
     }
-    .descripcion-box p { margin-bottom: 10px; }
-    .descripcion-box p:last-child { margin-bottom: 0; }
-    .precio-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 10pt; }
-    .precio-table th {
-        background: {{ color_primario }}; color: white; text-align: left;
-        padding: 8px 12px; font-size: 9pt; font-weight: 600;
-        text-transform: uppercase; letter-spacing: 0.5px;
+    .descripcion p { margin-bottom: 8px; }
+    .descripcion p:last-child { margin-bottom: 0; }
+
+    /* === TABLA PRECIOS === */
+    .precio-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 6px;
+        font-size: 9.5pt;
     }
-    .precio-table td { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; }
-    .precio-table .monto { text-align: right; font-family: 'Courier New', monospace; }
-    .precio-table .total-row td {
-        font-weight: 700; font-size: 12pt;
-        border-top: 2px solid {{ color_primario }}; border-bottom: none; padding-top: 12px;
+    .precio-table thead th {
+        background: {{ color_primario }};
+        color: white;
+        padding: 7px 10px;
+        font-size: 8pt;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-align: left;
     }
-    .condiciones { margin-top: 24px; padding-top: 14px; border-top: 1px solid #e0e0e0; }
-    .condiciones-titulo { font-size: 9pt; font-weight: 600; color: #666; margin-bottom: 6px; }
-    .condiciones li {
-        font-size: 8pt; color: #999; padding: 2px 0 2px 12px;
-        list-style: none; position: relative;
+    .precio-table thead th:last-child { text-align: right; }
+    .precio-table tbody td {
+        padding: 6px 10px;
+        border-bottom: 1px solid #f2f2f2;
     }
-    .condiciones li:before { content: "•"; position: absolute; left: 0; color: {{ color_primario }}; }
+    .precio-table tbody td:last-child {
+        text-align: right;
+        font-family: 'Courier New', monospace;
+        font-size: 9.5pt;
+    }
+    .precio-table tbody tr:nth-child(even) { background: #fcfcfc; }
+
+    /* Subtotal y total */
+    .totales {
+        margin-top: 8px;
+        border-top: 2px solid {{ color_primario }};
+        padding-top: 8px;
+    }
+    .totales-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 3px 10px;
+        font-size: 10pt;
+    }
+    .totales-row.total {
+        font-size: 13pt;
+        font-weight: 700;
+        color: {{ color_primario }};
+        margin-top: 4px;
+        padding-top: 6px;
+    }
+
+    /* === CONDICIONES === */
+    .condiciones {
+        margin-top: 18px;
+        padding-top: 10px;
+        border-top: 1px solid #e0e0e0;
+    }
+    .condiciones-titulo {
+        font-size: 8pt;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #999;
+        margin-bottom: 5px;
+    }
+    .condiciones-grid {
+        display: flex;
+        gap: 16px;
+    }
+    .condiciones-col { flex: 1; }
+    .condiciones-item {
+        font-size: 7.5pt;
+        color: #aaa;
+        padding: 1.5px 0 1.5px 8px;
+        position: relative;
+    }
+    .condiciones-item:before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 6px;
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: {{ color_primario }};
+    }
+
+    /* === FOOTER === */
     .footer {
-        position: fixed; bottom: 0; left: 0; right: 0;
-        text-align: center; font-size: 7.5pt; color: #bbb; padding: 8px;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 2cm;
+        font-size: 7pt;
+        color: #ccc;
+        border-top: 1px solid #f0f0f0;
     }
 </style>
 </head>
 <body>
 
+<!-- HEADER -->
 <div class="header">
-    <div class="header-logo">
+    <div>
         {% if negocio_logo %}
         <img src="{{ negocio_logo }}" alt="{{ negocio_nombre }}">
         {% else %}
-        <h2 style="color: {{ color_primario }}; font-size: 16pt;">{{ negocio_nombre }}</h2>
+        <div class="header-brand">{{ negocio_nombre }}</div>
         {% endif %}
     </div>
-    <div class="header-info">
-        <h1>Propuesta Comercial</h1>
-        <p>{{ fecha }}</p>
-        <p>Ref: {{ cotizacion_id|truncatechars:8 }}</p>
+    <div class="header-right">
+        <div class="titulo">Propuesta Comercial</div>
+        <div class="meta">{{ fecha }} | Ref: {{ cotizacion_id|truncatechars:8 }}</div>
     </div>
 </div>
 
-<div class="seccion">
-    <div class="seccion-titulo">Datos del Cliente</div>
-    <div class="info-row">
-        <span class="info-label">Nombre</span>
-        <span class="info-value">{{ prospecto_nombre }}</span>
+<!-- DATOS: NEGOCIO Y CLIENTE -->
+<div class="grid-2">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">Empresa</div>
+            <div class="card-row">
+                <span class="card-value" style="max-width:100%; font-weight:600;">{{ negocio_nombre }}</span>
+            </div>
+            {% if negocio_telefono %}
+            <div class="card-row">
+                <span class="card-label">Tel</span>
+                <span class="card-value">{{ negocio_telefono }}</span>
+            </div>
+            {% endif %}
+            {% if negocio_email %}
+            <div class="card-row">
+                <span class="card-label">Email</span>
+                <span class="card-value">{{ negocio_email }}</span>
+            </div>
+            {% endif %}
+            {% if negocio_web %}
+            <div class="card-row">
+                <span class="card-label">Web</span>
+                <span class="card-value">{{ negocio_web }}</span>
+            </div>
+            {% endif %}
+            {% if negocio_direccion %}
+            <div class="card-row">
+                <span class="card-label">Direccion</span>
+                <span class="card-value">{{ negocio_direccion }}</span>
+            </div>
+            {% endif %}
+        </div>
     </div>
-    {% if prospecto_empresa %}
-    <div class="info-row">
-        <span class="info-label">Empresa</span>
-        <span class="info-value">{{ prospecto_empresa }}</span>
+    <div class="col">
+        <div class="card">
+            <div class="card-header">Cliente</div>
+            <div class="card-row">
+                <span class="card-value" style="max-width:100%; font-weight:600;">{{ prospecto_nombre }}</span>
+            </div>
+            {% if prospecto_empresa %}
+            <div class="card-row">
+                <span class="card-label">Empresa</span>
+                <span class="card-value">{{ prospecto_empresa }}</span>
+            </div>
+            {% endif %}
+            <div class="card-row">
+                <span class="card-label">Email</span>
+                <span class="card-value">{{ prospecto_email }}</span>
+            </div>
+            {% if prospecto_telefono %}
+            <div class="card-row">
+                <span class="card-label">Tel</span>
+                <span class="card-value">{{ prospecto_telefono }}</span>
+            </div>
+            {% endif %}
+        </div>
     </div>
-    {% endif %}
-    <div class="info-row">
-        <span class="info-label">Email</span>
-        <span class="info-value">{{ prospecto_email }}</span>
-    </div>
-    {% if prospecto_telefono %}
-    <div class="info-row">
-        <span class="info-label">Telefono</span>
-        <span class="info-value">{{ prospecto_telefono }}</span>
-    </div>
-    {% endif %}
 </div>
 
+<!-- DESCRIPCION DEL SERVICIO -->
+{% if descripcion_parrafos %}
 <div class="seccion">
     <div class="seccion-titulo">{{ cotizador_nombre }}</div>
-    {% if descripcion_ia %}
-    <div class="descripcion-box">
+    <div class="descripcion">
         {% for parrafo in descripcion_parrafos %}
         <p>{{ parrafo }}</p>
         {% endfor %}
     </div>
-    {% endif %}
 </div>
+{% endif %}
 
+<!-- DETALLE DE LA INVERSION -->
 <div class="seccion">
     <div class="seccion-titulo">Detalle de la Inversion</div>
     <table class="precio-table">
         <thead>
             <tr>
-                <th>Concepto</th>
-                <th style="text-align: right">Valor</th>
+                <th style="width:60%">Concepto</th>
+                <th>Valor</th>
             </tr>
         </thead>
         <tbody>
             {% for item in desglose %}
             <tr>
                 <td>{{ item.regla }}</td>
-                <td class="monto">{{ item.valor|formato_cop }} {{ moneda }}</td>
+                <td>{{ item.valor|formato_cop }} {{ moneda }}</td>
             </tr>
             {% endfor %}
-            <tr class="total-row">
-                <td>Total</td>
-                <td class="monto">{{ total|formato_cop }} {{ moneda }}</td>
-            </tr>
         </tbody>
     </table>
+    <div class="totales">
+        {% if desglose|length > 1 %}
+        <div class="totales-row">
+            <span>Subtotal</span>
+            <span style="font-family:'Courier New',monospace;">{{ subtotal|formato_cop }} {{ moneda }}</span>
+        </div>
+        {% endif %}
+        <div class="totales-row total">
+            <span>Total</span>
+            <span style="font-family:'Courier New',monospace;">{{ total|formato_cop }} {{ moneda }}</span>
+        </div>
+    </div>
 </div>
 
+<!-- CONDICIONES -->
 <div class="condiciones">
     <div class="condiciones-titulo">Condiciones Comerciales</div>
-    <ul>
-        <li>Propuesta valida por 15 dias habiles</li>
-        <li>Precios expresados en {{ moneda }}</li>
-        <li>Anticipo del 50% para iniciar</li>
-        <li>Saldo contra entrega final</li>
-        <li>Tiempos de entrega sujetos a confirmacion</li>
-    </ul>
+    <div class="condiciones-grid">
+        <div class="condiciones-col">
+            <div class="condiciones-item">Propuesta valida por 15 dias habiles</div>
+            <div class="condiciones-item">Precios expresados en {{ moneda }}</div>
+            <div class="condiciones-item">Anticipo del 50% para iniciar</div>
+        </div>
+        <div class="condiciones-col">
+            <div class="condiciones-item">Saldo contra entrega final aprobada</div>
+            <div class="condiciones-item">Tiempos sujetos a confirmacion</div>
+            <div class="condiciones-item">Incluye revision y ajustes</div>
+        </div>
+    </div>
 </div>
 
-<div class="footer">{{ negocio_nombre }} | Propuesta generada con Tikno</div>
+<!-- FOOTER -->
+<div class="footer">
+    <span>{{ negocio_nombre }}{% if negocio_web %} | {{ negocio_web }}{% endif %}</span>
+    <span>Generado con Tikno Cotizador</span>
+</div>
 
 </body>
 </html>

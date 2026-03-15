@@ -1,5 +1,6 @@
 "use client"
 
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -63,6 +64,38 @@ export function StepRenderer({ campos }: Props) {
                 </label>
               ))}
             </RadioGroup>
+          )}
+
+          {campo.tipo === "multiple" && campo.opciones && (
+            <div className="space-y-2">
+              {campo.opciones.map((opcion, i) => {
+                const current = respuestas[campo.id] || ""
+                const selected = current.split(",").filter(Boolean)
+                const isChecked = selected.includes(opcion.valor)
+
+                function toggle() {
+                  let next: string[]
+                  if (isChecked) {
+                    next = selected.filter((v) => v !== opcion.valor)
+                  } else {
+                    next = [...selected, opcion.valor]
+                  }
+                  // Sumar todos los valores seleccionados
+                  const total = next.reduce((sum, v) => sum + Number(v), 0)
+                  setRespuesta(campo.id, String(total))
+                }
+
+                return (
+                  <label
+                    key={`${campo.id}-${i}`}
+                    className="flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition-all duration-200 hover:bg-primary/3 hover:border-primary/30 has-[data-state=checked]:border-primary has-[data-state=checked]:bg-primary/5"
+                  >
+                    <Checkbox checked={isChecked} onCheckedChange={toggle} />
+                    <span className="flex-1 text-sm">{opcion.label}</span>
+                  </label>
+                )
+              })}
+            </div>
           )}
 
           {campo.tipo === "area_m2" && (

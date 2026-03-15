@@ -14,7 +14,8 @@ import type { Campo } from "@/types/cotizador"
 const TIPO_LABELS: Record<string, string> = {
   texto: "Texto",
   numero: "Numero",
-  seleccion: "Seleccion",
+  seleccion: "Seleccion unica",
+  multiple: "Seleccion multiple",
   area_m2: "Area m2",
   slider: "Slider",
 }
@@ -98,7 +99,7 @@ export function FieldEditor({ pasoId, campo }: FieldEditorProps) {
       </div>
 
       {/* Opciones para tipo seleccion */}
-      {campo.tipo === "seleccion" && (
+      {(campo.tipo === "seleccion" || campo.tipo === "multiple") && (
         <div className="mt-3 space-y-2">
           <div className="flex items-center justify-between">
             <Label className="text-xs">Opciones</Label>

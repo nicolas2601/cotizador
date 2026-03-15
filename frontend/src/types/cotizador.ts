@@ -1,4 +1,4 @@
-export type CampoTipo = "texto" | "numero" | "seleccion" | "area_m2" | "slider"
+export type CampoTipo = "texto" | "numero" | "seleccion" | "multiple" | "area_m2" | "slider"
 
 export interface OpcionCampo {
   label: string

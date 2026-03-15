@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 CAMPOS_REQUERIDOS_COTIZADOR = {"nombre", "slug", "descripcion", "configuracion"}
 CAMPOS_REQUERIDOS_REGLA = {"nombre", "formula", "variables", "prioridad"}
-TIPOS_CAMPO_VALIDOS = {"texto", "numero", "seleccion", "area_m2", "slider"}
+TIPOS_CAMPO_VALIDOS = {"texto", "numero", "seleccion", "multiple", "area_m2", "slider"}
 
 
 def _extraer_json(texto: str) -> dict:
