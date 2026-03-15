@@ -60,5 +60,6 @@ export interface CotizadorPublico {
   configuracion: Configuracion
   moneda: string
   negocio_nombre: string
+  negocio_slug: string
   negocio_logo: string
 }

@@ -52,13 +52,14 @@ class CotizadorSerializer(serializers.ModelSerializer):
 
 class CotizadorPublicoSerializer(serializers.ModelSerializer):
     negocio_nombre = serializers.CharField(source="negocio.nombre", read_only=True)
+    negocio_slug = serializers.CharField(source="negocio.slug", read_only=True)
     negocio_logo = serializers.CharField(source="negocio.logo_url", read_only=True)
 
     class Meta:
         model = Cotizador
         fields = [
             "id", "nombre", "slug", "descripcion", "configuracion",
-            "moneda", "negocio_nombre", "negocio_logo",
+            "moneda", "negocio_nombre", "negocio_slug", "negocio_logo",
         ]
 
 

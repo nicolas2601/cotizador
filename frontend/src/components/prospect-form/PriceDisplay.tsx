@@ -41,8 +41,7 @@ export function PriceDisplay({ cotizador }: Props) {
 
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
-        const negocioSlug =
-          cotizador.negocio_nombre?.toLowerCase().replace(/\s+/g, "-") || "tikno"
+        const negocioSlug = cotizador.negocio_slug || "tikno"
 
         const res = await fetch(
           `${API_URL}/public/${negocioSlug}/${cotizador.slug}/preview/`,

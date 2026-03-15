@@ -1,513 +1,275 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useRef } from "react";
+import { 
+  motion, 
+  AnimatePresence, 
+  useScroll, 
+  useTransform, 
+  useSpring,
+  useInView 
+} from "framer-motion";
 import { 
   ArrowRight, 
-  CheckCircle2, 
   Calculator, 
-  FileText, 
-  Cloud, 
-  Lock, 
   Zap,
   ChevronDown,
-  ChevronUp,
-  LineChart,
-  Clock,
-  Briefcase
+  ShieldCheck,
+  Layers,
+  Sparkles,
+  Play
 } from "lucide-react";
 import Link from "next/link";
 
-const fadeIn = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+// --- COMPONENTS ---
+
+const NoiseOverlay = () => (
+  <div className="fixed inset-0 pointer-events-none z-[9999] opacity-[0.03] contrast-150 brightness-150 mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+);
+
+const ParallaxElement = ({ children, speed = 0.5 }: { children: React.ReactNode, speed?: number }) => {
+  const { scrollY } = useScroll();
+  const y = useTransform(scrollY, [0, 1000], [0, 1000 * speed]);
+  const smoothY = useSpring(y, { stiffness: 100, damping: 30 });
+
+  return <motion.div style={{ y: smoothY }}>{children}</motion.div>;
 };
 
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
+const BentoCard = ({ title, desc, icon, size = "1x1", delay = 0 }: { title: string, desc: string, icon: React.ReactNode, size?: "1x1" | "2x1" | "1x2", delay?: number }) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 30 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.8, delay, ease: [0.21, 0.45, 0.32, 0.9] }}
+      className={`relative group overflow-hidden rounded-[2.5rem] border border-white/5 bg-white/5 backdrop-blur-md p-8 md:p-10 flex flex-col justify-between hover:bg-white/[0.08] hover:border-white/10 transition-all duration-500
+        ${size === "2x1" ? "md:col-span-2" : ""}
+        ${size === "1x2" ? "md:row-span-2" : ""}
+      `}
+    >
+      <div className="absolute top-0 right-0 p-10 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity duration-500 scale-[2.5] origin-top-right">
+        {icon}
+      </div>
+      <div className="relative z-10">
+        <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 mb-8 group-hover:scale-110 transition-transform duration-500">
+          {icon}
+        </div>
+        <h3 className="text-2xl md:text-3xl font-black text-white mb-4 tracking-tighter leading-none">{title}</h3>
+        <p className="text-slate-400 leading-relaxed text-base md:text-lg font-light">{desc}</p>
+      </div>
+      <div className="mt-10 relative z-10">
+        <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 opacity-40 group-hover:opacity-100 group-hover:gap-4 transition-all duration-500">
+          Tecnología Tikno <ArrowRight className="w-3 h-3" />
+        </div>
+      </div>
+      <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-indigo-500/5 blur-[80px] rounded-full group-hover:bg-indigo-500/10 transition-colors duration-700" />
+    </motion.div>
+  );
 };
 
 export default function LandingClient() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const heroRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
+  });
+
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, 300]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.85]);
 
   const faqs = [
     {
-      q: "¿Cuánto cuesta el software de cotizaciones B2B en Colombia?",
-      a: "Tenemos planes accesibles para agencias y profesionales independientes desde $29 USD/mes, con una prueba gratuita de 14 días para asegurar tu retorno de inversión."
+      q: "¿Cuánto cuesta el software de cotizaciones B2B?",
+      a: "Ofrecemos planes escalables para agencias y profesionales. Desde $29 USD/mes con una prueba gratuita de 14 días para asegurar el retorno de inversión."
     },
     {
-      q: "¿Cuánto tiempo tarda en verse resultados?",
-      a: "En menos de 2 horas puedes tener tu primera regla de precio configurada y tu PDF listo para enviar a tu primer cliente."
+      q: "¿Es seguro para mis datos y fórmulas?",
+      a: "Utilizamos cifrado de grado bancario y entornos aislados por negocio. Tus márgenes y estrategias son 100% privados y seguros."
     },
     {
-      q: "¿Qué pasa si no quedo satisfecho?",
-      a: "Tienes 14 días de garantía. Te ayudamos a configurarlo; si no logras cotizar más rápido que con tu método actual, cancelas con un clic y te devolvemos el dinero."
-    },
-    {
-      q: "¿Cuál es la diferencia entre Tikno y usar Excel?",
-      a: "Excel no es interactivo para el cliente final, es propenso a errores humanos al copiar/pegar celdas ocultas y no genera PDFs con diseño premium de forma automática."
-    },
-    {
-      q: "¿Necesito experiencia previa para contratar este cotizador automático?",
-      a: "No. Si sabes cómo cobras tu trabajo hoy (ej. $100 base + $50 por hora), puedes usar Tikno. Nuestro motor de precios convierte tu lógica de negocio en una interfaz sencilla."
-    },
-    {
-      q: "¿Mis clientes finales pueden usar el cotizador solos?",
-      a: "Sí, puedes hacer tu link público para que prospectos coticen solos y reciban la propuesta de inmediato, filtrando curiosos y acelerando tus ventas."
+      q: "¿Puedo integrar mi propia marca?",
+      a: "Totalmente. El motor de branding de Tikno adapta cada PDF a tu identidad visual, tipografías y colores corporativos automáticamente."
     }
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-[#020617] text-slate-200 font-sans selection:bg-indigo-500 selection:text-white overflow-x-hidden">
+      <NoiseOverlay />
       
-      {/* SECCIÓN 2: HERO */}
-      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-        {/* Background glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-indigo-500/5 blur-[120px] rounded-full pointer-events-none" />
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+      {/* --- BACKGROUND AMBIENCE --- */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <ParallaxElement speed={-0.15}>
+          <div className="absolute top-[-10%] right-[-5%] w-[800px] h-[800px] bg-indigo-600/10 blur-[160px] rounded-full" />
+        </ParallaxElement>
+        <ParallaxElement speed={-0.05}>
+          <div className="absolute top-[30%] left-[-15%] w-[900px] h-[900px] bg-cyan-600/5 blur-[180px] rounded-full" />
+        </ParallaxElement>
+      </div>
+
+      {/* --- HERO SECTION --- */}
+      <section ref={heroRef} className="relative min-h-[110vh] flex items-center justify-center pt-20 overflow-hidden z-10">
+        <motion.div 
+          style={{ y: heroY, opacity: heroOpacity, scale: heroScale }}
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
+        >
           <motion.div 
-            initial="hidden"
-            animate="visible"
-            variants={staggerContainer}
-            className="max-w-4xl mx-auto"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: [0.21, 0.45, 0.32, 0.9] }}
+            className="mb-12 inline-flex items-center gap-3 px-6 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-xl text-indigo-300 text-[10px] font-black uppercase tracking-[0.4em]"
           >
-            <motion.div variants={fadeIn} className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-100 text-indigo-700 text-sm font-medium">
-              <Zap className="w-4 h-4" />
-              <span>Nuevo: Automatiza tu flujo de ventas</span>
-            </motion.div>
-            
-            <motion.h1 variants={fadeIn} className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 mb-8 leading-tight">
-              Cierra más ventas con <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-cyan-500">cotizaciones automáticas</span> que se envían solas.
-            </motion.h1>
-            
-            <motion.p variants={fadeIn} className="text-xl md:text-2xl text-slate-600 mb-6 leading-relaxed max-w-3xl mx-auto">
-              Deja de perder horas en Excel y Word. Convierte tus precios en un formulario interactivo y entrega propuestas PDF perfectas al instante.
-            </motion.p>
-
-            <motion.p variants={fadeIn} className="text-base text-slate-500 mb-10 max-w-2xl mx-auto">
-              Ayudamos a agencias y negocios B2B a automatizar su flujo de ventas, eliminando el trabajo manual para que coticen 10x más rápido.
-            </motion.p>
-            
-            <motion.div variants={fadeIn} className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link href="/cotizadores">
-                <button className="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 transition-all duration-200 flex items-center justify-center gap-2 group text-lg">
-                  Crear mi primer cotizador gratis
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </button>
-              </Link>
-            </motion.div>
-            
-            <motion.p variants={fadeIn} className="mt-6 text-sm text-slate-500 font-medium flex items-center justify-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-              +2.500 horas de trabajo manual ahorradas a nuestros clientes beta.
-            </motion.p>
+            <Sparkles className="w-3 h-3 text-indigo-400" />
+            <span>Sistema de Cotización Inteligente</span>
           </motion.div>
-        </div>
-      </section>
-
-      {/* SECCIÓN 3: QUIÉNES SOMOS */}
-      <section className="py-20 bg-white border-y border-slate-100">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={staggerContainer}
-            className="text-center space-y-6"
-          >
-            <motion.h2 variants={fadeIn} className="text-3xl font-bold text-slate-900">
-              Nuestra Historia
-            </motion.h2>
-            <motion.p variants={fadeIn} className="text-lg text-slate-600 leading-relaxed">
-              Nacimos al ver cómo agencias de diseño web y despachos de reformas perdían negocios rentables por demorar días en enviar una propuesta comercial. Notamos que la barrera no era el precio, sino la fricción operativa de armar PDFs personalizados.
-            </motion.p>
-            <motion.p variants={fadeIn} className="text-lg text-slate-600 leading-relaxed">
-              Creemos que la tecnología debe trabajar para ti, no al revés. Tu tiempo es para ejecutar y escalar, no para calcular márgenes en hojas de cálculo.
-            </motion.p>
-            <motion.p variants={fadeIn} className="text-xl font-semibold text-indigo-600 mt-4">
-              Por eso, cuando trabajas con nosotros, tú recuperas el control de tu tiempo comercial.
-            </motion.p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* SECCIÓN 4: EL PROBLEMA */}
-      <section className="py-24 bg-slate-50">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={staggerContainer}
-            className="text-center mb-16"
-          >
-            <motion.h2 variants={fadeIn} className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-              ¿Sientes que haces trabajo gratis cada vez que cotizas un nuevo proyecto?
-            </motion.h2>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100"
+          
+          <h1 className="text-7xl md:text-9xl lg:text-[11rem] font-[900] tracking-[-0.06em] text-white mb-12 leading-[0.85] text-center">
+            VENDE MÁS <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-b from-white via-indigo-200 to-indigo-500/50">AL INSTANTE.</span>
+          </h1>
+          
+          <p className="text-xl md:text-3xl text-slate-400 mb-16 max-w-3xl mx-auto leading-tight font-light tracking-tight">
+            Elimina la burocracia comercial. Tikno transforma tus cálculos en una experiencia de venta fluida y automática.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
+            <Link href="/cotizadores">
+              <motion.button 
+                whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(99, 102, 241, 0.4)" }}
+                whileTap={{ scale: 0.98 }}
+                className="px-12 py-6 bg-white text-black font-[900] rounded-full shadow-2xl transition-all duration-500 flex items-center gap-4 group text-xl"
+              >
+                EMPEZAR AHORA
+                <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform duration-500" />
+              </motion.button>
+            </Link>
+            <motion.button 
+              whileHover={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)" }}
+              className="px-12 py-6 border border-white/10 text-white font-bold rounded-full transition-all duration-500 flex items-center gap-4 text-xl group"
             >
-              <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mb-6 text-red-500">
-                <FileText className="w-6 h-6" />
+              <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-indigo-500 transition-colors duration-500">
+                <Play className="w-4 h-4 fill-current ml-1" />
               </div>
-              <h3 className="text-xl font-bold mb-3 text-slate-900">Lo que ves</h3>
-              <p className="text-slate-600">Ves tu bandeja de enviados llena de propuestas que tomaron horas armar y que los clientes nunca responden o ignoran.</p>
-            </motion.div>
-
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100"
-            >
-              <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mb-6 text-orange-500">
-                <Briefcase className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-slate-900">Lo que sientes</h3>
-              <p className="text-slate-600">Sientes agotamiento al tener que abrir ese viejo Excel, buscar la plantilla de Word, copiar, pegar y rogar no haber dejado el nombre del cliente anterior.</p>
-            </motion.div>
-
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100"
-            >
-              <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center mb-6 text-rose-500">
-                <Clock className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-slate-900">Lo que pierdes</h3>
-              <p className="text-slate-600">Pierdes la inercia de la venta. Mientras tú tardas dos días en cotizar, tu competencia lo hizo en la misma llamada.</p>
-            </motion.div>
+              VER DEMO
+            </motion.button>
           </div>
+        </motion.div>
+      </section>
 
+      {/* --- BENTO GRID --- */}
+      <section className="py-40 relative z-10 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
           <motion.div 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1 }}
             viewport={{ once: true }}
-            className="mt-16 text-center"
+            className="mb-24 text-left max-w-4xl"
           >
-            <p className="text-xl text-slate-700 font-medium">
-              El problema no está en tus precios. Está en tu proceso manual. <br className="hidden sm:block" />
-              <span className="text-indigo-600 font-bold">Y eso tiene solución.</span>
+            <h2 className="text-indigo-500 font-[900] uppercase tracking-[0.5em] text-[10px] mb-6">Arquitectura Tikno</h2>
+            <h3 className="text-6xl md:text-8xl font-[900] text-white mb-10 tracking-[-0.04em] leading-[0.9]">
+              El motor que <br /> reescribe tus cierres.
+            </h3>
+            <p className="text-xl md:text-2xl text-slate-500 font-light leading-relaxed tracking-tight">
+              Diseñado para agencias que no tienen tiempo que perder. Un núcleo aritmético potente envuelto en una interfaz de grado editorial.
             </p>
           </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 auto-rows-[300px] md:auto-rows-[350px]">
+            <BentoCard 
+              size="2x1"
+              delay={0.1}
+              icon={<Calculator className="w-8 h-8" />}
+              title="Motor Aritmético Dinámico"
+              desc="Configura reglas basadas en cualquier variable: m², horas, licencias o complejidad. Tikno calcula tus márgenes con precisión absoluta en tiempo real."
+            />
+            <BentoCard 
+              size="1x2"
+              delay={0.2}
+              icon={<ShieldCheck className="w-8 h-8" />}
+              title="Seguridad de Grado Bancario"
+              desc="Entornos aislados y cifrados. Tus fórmulas estratégicas y datos de clientes están protegidos bajo los estándares de seguridad más rigurosos de la industria."
+            />
+            <BentoCard 
+              delay={0.3}
+              icon={<Zap className="w-8 h-8" />}
+              title="Cierre en <200ms"
+              desc="Generación instantánea. Entrega la propuesta formal mientras el cliente aún está procesando la llamada. La inmediatez es tu mayor ventaja."
+            />
+            <BentoCard 
+              delay={0.4}
+              icon={<Layers className="w-8 h-8" />}
+              title="Branding Editorial"
+              desc="Olvida los PDFs genéricos. Generamos documentos inmaculados que respiran tu marca, adaptándose dinámicamente a la longitud de tu oferta."
+            />
+          </div>
         </div>
       </section>
 
-      {/* SECCIÓN 5: LA SOLUCIÓN */}
-      <section className="py-24 bg-white">
+      {/* --- SCROLL REVEAL TEXT (EDITORIAL) --- */}
+      <section className="py-60 bg-white text-black relative z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-indigo-600 font-semibold tracking-wide uppercase mb-3">Tikno Pricing Engine & PDF Generator</h2>
-            <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">
-              Cómo nuestro creador de cotizaciones transforma tu embudo
-            </h3>
-            <p className="text-lg text-slate-600">
-              Convertimos tu cálculo de precios más complejo en una experiencia fluida e inmediata.
-            </p>
+          <div className="flex flex-col gap-40">
+            <motion.div 
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.2 }}
+              viewport={{ once: true, margin: "-100px" }}
+              className="max-w-4xl"
+            >
+              <h4 className="text-[10rem] md:text-[15rem] font-[900] tracking-[-0.08em] mb-12 leading-[0.75] opacity-[0.05] absolute -top-20 left-0 select-none">FREEDOM</h4>
+              <h4 className="text-7xl md:text-[10rem] font-[900] tracking-[-0.06em] mb-12 leading-[0.8] relative z-10">MÁS <br /> LIBERTAD.</h4>
+              <p className="text-3xl md:text-5xl font-light text-slate-500 leading-[1.1] tracking-tight relative z-10">
+                Recupera las horas perdidas en Word y Excel. Tikno te permite enfocarte en lo que realmente importa: <span className="text-black font-black underline decoration-indigo-500 underline-offset-8">hacer crecer tu negocio.</span>
+              </p>
+            </motion.div>
+            
+            <motion.div 
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.2, delay: 0.2 }}
+              viewport={{ once: true, margin: "-100px" }}
+              className="max-w-4xl ml-auto text-right"
+            >
+              <h4 className="text-[10rem] md:text-[15rem] font-[900] tracking-[-0.08em] mb-12 leading-[0.75] opacity-[0.05] absolute -bottom-20 right-0 select-none">GROWTH</h4>
+              <h4 className="text-7xl md:text-[10rem] font-[900] tracking-[-0.06em] mb-12 leading-[0.8] relative z-10">MÁS <br /> CIERRES.</h4>
+              <p className="text-3xl md:text-5xl font-light text-slate-500 leading-[1.1] tracking-tight relative z-10">
+                En el B2B, la velocidad es confianza. Entrega resultados en el punto máximo de interés y <span className="text-black font-black underline decoration-cyan-500 underline-offset-8">multiplica tu tasa de conversión.</span>
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- FAQ --- */}
+      <section className="py-40 bg-[#020617] px-4 sm:px-6 lg:px-8 relative z-10 border-t border-white/5">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-24 text-center">
+            <h2 className="text-indigo-500 font-[900] uppercase tracking-[0.5em] text-[10px] mb-6 text-center">Preguntas</h2>
+            <h3 className="text-5xl md:text-7xl font-[900] text-white mb-8 tracking-tighter">Sin dudas.</h3>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              {[
-                {
-                  title: "Cotiza en tiempo real",
-                  desc: "gracias a formularios interactivos personalizados que guían a tu cliente.",
-                  icon: <Zap className="w-6 h-6 text-yellow-500" />
-                },
-                {
-                  title: "Reduce errores de cálculo a cero",
-                  desc: "gracias a nuestras reglas de precios avanzadas y centralizadas.",
-                  icon: <Calculator className="w-6 h-6 text-indigo-500" />
-                },
-                {
-                  title: "Entrega una imagen premium",
-                  desc: "gracias a propuestas PDF generadas automáticamente con tu branding.",
-                  icon: <FileText className="w-6 h-6 text-cyan-500" />
-                },
-                {
-                  title: "Aumenta tu tasa de cierre",
-                  desc: "gracias a entregar el precio en el punto máximo de interés del cliente.",
-                  icon: <LineChart className="w-6 h-6 text-emerald-500" />
-                }
-              ].map((benefit, i) => (
-                <motion.div 
-                  key={i}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className="flex gap-4"
-                >
-                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center">
-                    {benefit.icon}
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-bold text-slate-900 mb-1">{benefit.title}</h4>
-                    <p className="text-slate-600">{benefit.desc}</p>
-                  </div>
-                </motion.div>
-              ))}
-              
+          <div className="space-y-6">
+            {faqs.map((faq, index) => (
               <motion.div 
+                key={index} 
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
-                className="pt-6"
+                className="border border-white/5 rounded-[2rem] overflow-hidden bg-white/5 backdrop-blur-md transition-all duration-500"
               >
-                <Link href="/cotizadores">
-                  <button className="text-indigo-600 font-bold flex items-center gap-2 hover:gap-3 transition-all">
-                    Ver cómo funciona la magia <ArrowRight className="w-5 h-5" />
-                  </button>
-                </Link>
-              </motion.div>
-            </div>
-            
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              className="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-200 bg-slate-50 aspect-square md:aspect-auto md:h-[600px] flex items-center justify-center p-8"
-            >
-              {/* Mockup UI representation */}
-              <div className="w-full max-w-sm bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden">
-                <div className="bg-slate-50 px-4 py-3 border-b border-slate-100 flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                  <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                  <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                </div>
-                <div className="p-6 space-y-4">
-                  <div className="h-4 bg-slate-200 rounded w-1/3 mb-6"></div>
-                  <div className="space-y-2">
-                    <div className="h-3 bg-slate-100 rounded w-full"></div>
-                    <div className="h-10 bg-indigo-50 rounded border border-indigo-100 w-full"></div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="h-3 bg-slate-100 rounded w-full"></div>
-                    <div className="h-10 bg-slate-50 rounded border border-slate-100 w-full"></div>
-                  </div>
-                  <div className="pt-4 flex justify-between items-center border-t border-slate-50 mt-4">
-                    <div className="h-6 bg-slate-200 rounded w-1/4"></div>
-                    <div className="h-8 bg-indigo-600 rounded w-1/3"></div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECCIÓN 6: PROCESO PASO A PASO */}
-      <section className="py-24 bg-slate-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Así trabajamos contigo para automatizar tus ventas</h2>
-            <p className="text-slate-400 text-lg">Un flujo de trabajo diseñado para eliminar la fricción.</p>
-          </div>
-
-          <div className="grid md:grid-cols-4 gap-8">
-            {[
-              {
-                step: "1",
-                title: "Configura tus variables",
-                desc: "Defines tus servicios, precios base y multiplicadores (ej. metros cuadrados o páginas web)."
-              },
-              {
-                step: "2",
-                title: "Tikno crea tu interfaz",
-                desc: "Generamos un formulario web interactivo y profesional para ti o tus clientes."
-              },
-              {
-                step: "3",
-                title: "El cliente cotiza",
-                desc: "Ingresa sus requerimientos y nuestro motor calcula todo en milisegundos."
-              },
-              {
-                step: "4",
-                title: "El PDF llega al correo",
-                desc: "Un documento inmaculado con tu marca, el desglose y el precio final llega a su bandeja."
-              }
-            ].map((item, i) => (
-              <motion.div 
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="relative"
-              >
-                <div className="text-6xl font-black text-slate-800 absolute -top-8 -left-4 z-0">{item.step}</div>
-                <div className="relative z-10 pt-4 border-t-2 border-indigo-500">
-                  <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">{item.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-          
-          <div className="mt-16 text-center">
-            <p className="text-indigo-300 italic font-medium">Desde la primera configuración hasta el PDF final, acompañamos cada etapa.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* SECCIÓN 7: PRUEBA SOCIAL */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-slate-900">Resultados reales para agencias reales</h2>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 mb-16">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              className="p-8 rounded-2xl bg-slate-50 border border-slate-100"
-            >
-              <div className="flex gap-1 text-yellow-400 mb-4">
-                {[...Array(5)].map((_, i) => <svg key={i} className="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>)}
-              </div>
-              <p className="text-lg text-slate-700 italic mb-6">&quot;Antes tardábamos 3 días en enviar un presupuesto de obra. Ahora lo hacemos desde el móvil frente al cliente. La tasa de conversión subió por pura velocidad.&quot;</p>
-              <div>
-                <p className="font-bold text-slate-900">Javier R.</p>
-                <p className="text-sm text-slate-500">CEO, Empresa de Reformas</p>
-              </div>
-            </motion.div>
-
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="p-8 rounded-2xl bg-slate-50 border border-slate-100"
-            >
-              <div className="flex gap-1 text-yellow-400 mb-4">
-                {[...Array(5)].map((_, i) => <svg key={i} className="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>)}
-              </div>
-              <p className="text-lg text-slate-700 italic mb-6">&quot;Mis clientes de diseño web aman la transparencia. Juegan con el cotizador y eligen el plan más caro sin que yo intervenga. Es un vendedor automático.&quot;</p>
-              <div>
-                <p className="font-bold text-slate-900">Sofía T.</p>
-                <p className="text-sm text-slate-500">Fundadora, Agencia Digital</p>
-              </div>
-            </motion.div>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center border-t border-slate-100 pt-16">
-            <div>
-              <div className="text-4xl font-black text-indigo-600 mb-2">{"<200ms"}</div>
-              <p className="text-slate-600 font-medium">Motor de cálculo</p>
-            </div>
-            <div>
-              <div className="text-4xl font-black text-indigo-600 mb-2">100%</div>
-              <p className="text-slate-600 font-medium">Precisión en fórmulas</p>
-            </div>
-            <div>
-              <div className="text-4xl font-black text-indigo-600 mb-2">+45%</div>
-              <p className="text-slate-600 font-medium">Cierre de ventas</p>
-            </div>
-            <div>
-              <div className="text-4xl font-black text-indigo-600 mb-2">0 hrs</div>
-              <p className="text-slate-600 font-medium">Trabajo manual</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECCIÓN 8: POR QUÉ ELEGIRNOS */}
-      <section className="py-24 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Lo que nos hace diferentes al resto de herramientas</h2>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {[
-              {
-                icon: <Calculator className="w-5 h-5" />,
-                title: "Motor sin código",
-                desc: "Usa reglas aritméticas reales sin programar ni tocar código."
-              },
-              {
-                icon: <FileText className="w-5 h-5" />,
-                title: "Diseño en un clic",
-                desc: "Olvida los editores drag & drop lentos; nosotros generamos el diseño limpio automáticamente."
-              },
-              {
-                icon: <Cloud className="w-5 h-5" />,
-                title: "Todo en la nube",
-                desc: "Tus precios centralizados. Si cambias una tarifa, se actualiza en todo el sistema."
-              },
-              {
-                icon: <Lock className="w-5 h-5" />,
-                title: "Privacidad B2B",
-                desc: "Cada entorno de cliente está aislado. Tus márgenes y fórmulas son 100% privados."
-              }
-            ].map((feature, i) => (
-              <motion.div 
-                key={i}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex gap-4 items-start hover:border-indigo-100 hover:shadow-md transition-all"
-              >
-                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg shrink-0">
-                  {feature.icon}
-                </div>
-                <div>
-                  <h4 className="font-bold text-slate-900 mb-1">{feature.title}</h4>
-                  <p className="text-sm text-slate-600">{feature.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          <div className="mt-16 text-center max-w-2xl mx-auto bg-indigo-50 border border-indigo-100 rounded-2xl p-8">
-            <p className="text-indigo-900 font-medium">
-              <span className="font-bold">Garantía Incondicional:</span> Si en 14 días no logras enviar cotizaciones más rápido que con Excel, te devolvemos tu inversión sin hacer preguntas.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* SECCIÓN 9: FAQ */}
-      <section className="py-24 bg-white">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900">Preguntas Frecuentes</h2>
-          </div>
-
-          <div className="space-y-4">
-            {faqs.map((faq, index) => (
-              <div key={index} className="border border-slate-200 rounded-xl overflow-hidden">
                 <button 
                   onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                  className="w-full px-6 py-4 text-left flex justify-between items-center bg-slate-50 hover:bg-slate-100 transition-colors"
+                  className="w-full px-10 py-8 text-left flex justify-between items-center hover:bg-white/[0.03] transition-colors group"
                 >
-                  <span className="font-bold text-slate-900">{faq.q}</span>
-                  {openFaq === index ? (
-                    <ChevronUp className="w-5 h-5 text-slate-500" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5 text-slate-500" />
-                  )}
+                  <span className="font-bold text-white text-xl tracking-tight">{faq.q}</span>
+                  <div className={`w-8 h-8 rounded-full border border-white/10 flex items-center justify-center transition-transform duration-500 ${openFaq === index ? "rotate-180 bg-indigo-500 border-indigo-500" : ""}`}>
+                    <ChevronDown className="w-4 h-4 text-white" />
+                  </div>
                 </button>
                 <AnimatePresence>
                   {openFaq === index && (
@@ -515,48 +277,65 @@ export default function LandingClient() {
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
+                      transition={{ duration: 0.5, ease: [0.21, 0.45, 0.32, 0.9] }}
                     >
-                      <div className="px-6 py-4 bg-white text-slate-600 border-t border-slate-100">
+                      <div className="px-10 pb-10 text-slate-400 text-lg font-light leading-relaxed border-t border-white/5 pt-6">
                         {faq.a}
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* SECCIÓN 10: CTA FINAL */}
-      <section className="py-24 bg-indigo-600 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay"></div>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center text-white">
-          <h2 className="text-4xl md:text-5xl font-black mb-6">Tu competencia ya está automatizando. Es tu turno.</h2>
-          <p className="text-xl text-indigo-100 mb-10 max-w-2xl mx-auto">
-            No dejes que un PDF lento te robe otro cliente. La inmediatez es la nueva ventaja competitiva en ventas B2B.
-          </p>
-          
-          <Link href="/cotizadores">
-            <button className="px-8 py-4 bg-white text-indigo-900 hover:bg-slate-50 font-bold rounded-xl shadow-xl transition-all duration-200 group text-lg inline-flex items-center gap-2">
-              Agenda tu sesión de configuración gratuita
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
-          </Link>
-          
-          <p className="mt-4 text-sm text-indigo-200">Sin compromisos. Empieza a cotizar hoy.</p>
-          
-          <div className="mt-16 pt-8 border-t border-indigo-500/30 flex flex-col sm:flex-row justify-center items-center gap-6 text-sm text-indigo-200">
-            <span>soporte@tikno.pro</span>
-            <span className="hidden sm:inline">•</span>
-            <span>WhatsApp Disponible</span>
-            <span className="hidden sm:inline">•</span>
-            <span className="italic">Queremos verte cerrar ese contrato gigante. Hablemos.</span>
-          </div>
+      {/* --- FINAL CTA --- */}
+      <section className="py-60 relative z-10 overflow-hidden text-center">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-8xl md:text-[12rem] font-[900] text-white mb-12 tracking-[-0.08em] leading-none">
+              ES TU <br /> TURNO.
+            </h2>
+            <p className="text-2xl md:text-3xl text-slate-500 mb-20 max-w-2xl mx-auto font-light tracking-tight leading-snug">
+              Únete a las agencias que ya están operando a la velocidad del software.
+            </p>
+            <Link href="/cotizadores">
+              <motion.button 
+                whileHover={{ scale: 1.05, boxShadow: "0 30px 60px rgba(99, 102, 241, 0.4)" }}
+                whileTap={{ scale: 0.98 }}
+                className="px-16 py-8 bg-indigo-600 text-white font-[900] rounded-full shadow-2xl transition-all duration-500 flex items-center gap-4 mx-auto text-2xl group"
+              >
+                EMPEZAR GRATIS
+                <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform duration-500" />
+              </motion.button>
+            </Link>
+            <p className="mt-12 text-xs text-slate-600 font-[900] uppercase tracking-[0.5em]">Sin compromisos • 100% Automático</p>
+          </motion.div>
         </div>
+        
+        {/* Decorative Gradients */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-indigo-500/10 blur-[200px] rounded-full pointer-events-none" />
       </section>
 
+      {/* FOOTER */}
+      <footer className="py-20 border-t border-white/5 px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12">
+          <div className="text-3xl font-[900] text-white tracking-[-0.06em]">TIKNO<span className="text-indigo-500">.</span></div>
+          <div className="flex gap-12 text-slate-500 text-[10px] font-black uppercase tracking-[0.4em]">
+            <a href="#" className="hover:text-white transition-colors duration-300">Privacidad</a>
+            <a href="#" className="hover:text-white transition-colors duration-300">Términos</a>
+            <a href="#" className="hover:text-white transition-colors duration-300">Soporte</a>
+          </div>
+          <p className="text-slate-600 text-[10px] font-bold tracking-widest uppercase">Bucaramanga, Col • 2026</p>
+        </div>
+      </footer>
     </div>
   );
 }
