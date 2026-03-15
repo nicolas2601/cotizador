@@ -50,3 +50,15 @@ export interface Cotizador {
   created_at: string
   updated_at: string
 }
+
+// Respuesta del endpoint publico (CotizadorPublicoSerializer)
+export interface CotizadorPublico {
+  id: string
+  nombre: string
+  slug: string
+  descripcion: string
+  configuracion: Configuracion
+  moneda: string
+  negocio_nombre: string
+  negocio_logo: string
+}
