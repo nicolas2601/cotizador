@@ -1,3 +1,5 @@
+from django.utils.decorators import method_decorator
+from django_ratelimit.decorators import ratelimit
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -11,6 +13,7 @@ from .services import CotizacionService
 from .tasks import procesar_cotizacion
 
 
+@method_decorator(ratelimit(key='ip', rate='10/m', method='POST'), name='post')
 class CotizarPublicoView(APIView):
     permission_classes = [AllowAny]
 

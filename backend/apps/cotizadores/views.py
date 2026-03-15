@@ -1,3 +1,5 @@
+from django.utils.decorators import method_decorator
+from django_ratelimit.decorators import ratelimit
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -68,6 +70,7 @@ class ReglaPrecioViewSet(viewsets.ModelViewSet):
         serializer.save(cotizador=cotizador)
 
 
+@method_decorator(ratelimit(key='ip', rate='60/m', method='GET'), name='get')
 class CotizadorPublicoView(APIView):
     permission_classes = [AllowAny]
 
@@ -81,6 +84,7 @@ class CotizadorPublicoView(APIView):
         return Response(CotizadorPublicoSerializer(cotizador).data)
 
 
+@method_decorator(ratelimit(key='ip', rate='30/m', method='POST'), name='post')
 class CotizarPublicoView(APIView):
     permission_classes = [AllowAny]
 

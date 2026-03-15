@@ -91,6 +91,11 @@ export default function LoginPage() {
               Registrate
             </a>
           </p>
+          <p className="mt-2 text-center text-sm text-muted-foreground">
+            <a href="/docs" className="cursor-pointer transition-colors hover:text-foreground hover:underline">
+              Ver documentacion
+            </a>
+          </p>
         </CardContent>
       </Card>
       <Toaster />

@@ -31,6 +31,9 @@ export function DashboardNav() {
           <a href="/configuracion" className="transition-colors hover:text-foreground">
             Configuracion
           </a>
+          <a href="/docs" className="transition-colors hover:text-foreground" target="_blank" rel="noopener noreferrer">
+            Docs
+          </a>
           <Button
             variant="ghost"
             size="sm"
