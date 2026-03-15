@@ -106,9 +106,25 @@ class CotizacionService:
 
     @staticmethod
     def subir_pdf_supabase(cotizacion: Cotizacion, pdf_bytes: bytes) -> str:
-        from django.core.files.storage import default_storage
+        import os
+        from django.conf import settings as django_settings
 
         filename = f"cotizaciones/{cotizacion.negocio.slug}/{cotizacion.id}.pdf"
+
+        # En desarrollo: guardar en disco local (media/)
+        if django_settings.DEBUG:
+            media_path = os.path.join(django_settings.MEDIA_ROOT, filename)
+            os.makedirs(os.path.dirname(media_path), exist_ok=True)
+            with open(media_path, "wb") as f:
+                f.write(pdf_bytes)
+            url = f"/media/{filename}"
+            cotizacion.pdf_url = url
+            cotizacion.save(update_fields=["pdf_url"])
+            logger.info(f"PDF guardado localmente: {media_path}")
+            return url
+
+        # En produccion: subir a Supabase Storage
+        from django.core.files.storage import default_storage
 
         try:
             path = default_storage.save(filename, ContentFile(pdf_bytes))
