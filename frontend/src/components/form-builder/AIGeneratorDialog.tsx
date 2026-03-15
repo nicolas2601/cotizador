@@ -42,7 +42,7 @@ export function AIGeneratorDialog({ trigger }: AIGeneratorDialogProps) {
 
     setLoading(true)
     try {
-      const data = await apiFetch<Cotizador>("/api/ia/generar-cotizador/", {
+      const data = await apiFetch<Cotizador>("/ia/generar-cotizador/", {
         method: "POST",
         body: JSON.stringify({ descripcion }),
         token,
