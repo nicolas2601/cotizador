@@ -85,6 +85,12 @@ export default function LoginPage() {
               Iniciar sesion
             </Button>
           </form>
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            No tienes cuenta?{" "}
+            <a href="/registro" className="font-medium text-foreground hover:underline">
+              Registrate
+            </a>
+          </p>
         </CardContent>
       </Card>
       <Toaster />

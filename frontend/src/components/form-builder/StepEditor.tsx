@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
 
 import { useFormBuilderStore } from "@/stores/form-builder-store"
@@ -60,23 +60,25 @@ export function StepEditor({ paso }: StepEditorProps) {
           <p className="text-sm font-medium">
             Campos ({paso.campos.length})
           </p>
-          <Select
-            onValueChange={(tipo: CampoTipo) => agregarCampo(paso.id, tipo)}
-          >
-            <SelectTrigger className="w-auto gap-1.5" asChild>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
                 <Plus className="mr-1 h-3.5 w-3.5" />
                 Campo
               </Button>
-            </SelectTrigger>
-            <SelectContent>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
               {TIPOS_CAMPO.map((t) => (
-                <SelectItem key={t.value} value={t.value}>
+                <DropdownMenuItem
+                  key={t.value}
+                  onClick={() => agregarCampo(paso.id, t.value)}
+                  className="cursor-pointer"
+                >
                   {t.label}
-                </SelectItem>
+                </DropdownMenuItem>
               ))}
-            </SelectContent>
-          </Select>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {paso.campos.length === 0 ? (
