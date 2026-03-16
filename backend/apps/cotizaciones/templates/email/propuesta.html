@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Propuesta Comercial</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f4f4f7; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f7;">
+<tr>
+<td align="center" style="padding:40px 20px;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+  <!-- Header bar -->
+  <tr>
+    <td style="background-color:{{ color_primario }}; height:6px; font-size:0; line-height:0;">&nbsp;</td>
+  </tr>
+
+  <!-- Logo / Business name -->
+  <tr>
+    <td style="padding:32px 40px 20px 40px; text-align:center;">
+      {% if negocio_logo %}
+      <img src="{{ negocio_logo }}" alt="{{ negocio_nombre }}" style="max-height:50px; max-width:180px; width:auto; height:auto;" />
+      {% else %}
+      <h2 style="margin:0; font-size:24px; font-weight:700; color:{{ color_primario }};">{{ negocio_nombre }}</h2>
+      {% endif %}
+    </td>
+  </tr>
+
+  <!-- Greeting -->
+  <tr>
+    <td style="padding:10px 40px 0 40px;">
+      <h1 style="margin:0 0 8px 0; font-size:22px; font-weight:700; color:#1a1a2e;">
+        Hola {{ prospecto_nombre }},
+      </h1>
+      <p style="margin:0; font-size:15px; line-height:1.6; color:#555;">
+        Hemos preparado tu propuesta comercial para el servicio de
+        <strong style="color:#1a1a2e;">{{ cotizador_nombre }}</strong>.
+        Adjunto encontraras el documento PDF con todos los detalles.
+      </p>
+    </td>
+  </tr>
+
+  <!-- Price highlight box -->
+  <tr>
+    <td style="padding:24px 40px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:{{ color_primario }}; border-radius:10px;">
+        <tr>
+          <td style="padding:24px 30px; text-align:center;">
+            <p style="margin:0 0 4px 0; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:rgba(255,255,255,0.8);">
+              Inversion Total
+            </p>
+            <p style="margin:0; font-size:36px; font-weight:800; color:#ffffff; letter-spacing:-0.5px;">
+              {{ total }} {{ moneda }}
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <!-- CTA Button -->
+  {% if pdf_url %}
+  <tr>
+    <td style="padding:0 40px 24px 40px; text-align:center;">
+      <a href="{{ pdf_url }}" target="_blank" style="display:inline-block; padding:14px 36px; background-color:{{ color_primario }}; color:#ffffff; text-decoration:none; font-size:15px; font-weight:700; border-radius:8px; letter-spacing:0.3px;">
+        Ver Propuesta Completa
+      </a>
+    </td>
+  </tr>
+  {% endif %}
+
+  {% if url_aceptar %}
+  <tr>
+    <td style="padding:0 40px 8px 40px; text-align:center;">
+      <a href="{{ url_aceptar }}" target="_blank" style="display:inline-block; padding:14px 36px; background-color:#16a34a; color:#ffffff; text-decoration:none; font-size:15px; font-weight:700; border-radius:8px; letter-spacing:0.3px;">
+        Aceptar Propuesta
+      </a>
+    </td>
+  </tr>
+  {% endif %}
+
+  <!-- Message -->
+  <tr>
+    <td style="padding:0 40px 24px 40px;">
+      <p style="margin:0; font-size:14px; line-height:1.6; color:#777;">
+        Si tienes alguna pregunta o deseas discutir los detalles, no dudes en contactarnos.
+        Estamos a tu disposicion para ajustar la propuesta a tus necesidades.
+      </p>
+    </td>
+  </tr>
+
+  <!-- Divider -->
+  <tr>
+    <td style="padding:0 40px;">
+      <hr style="border:none; border-top:1px solid #eee; margin:0;" />
+    </td>
+  </tr>
+
+  <!-- Contact info -->
+  <tr>
+    <td style="padding:20px 40px;">
+      <p style="margin:0 0 4px 0; font-size:13px; font-weight:700; color:#1a1a2e;">{{ negocio_nombre }}</p>
+      {% if negocio_telefono %}
+      <p style="margin:0 0 2px 0; font-size:13px; color:#888;">Tel: {{ negocio_telefono }}</p>
+      {% endif %}
+      {% if negocio_email %}
+      <p style="margin:0 0 2px 0; font-size:13px; color:#888;">Email: {{ negocio_email }}</p>
+      {% endif %}
+      {% if negocio_web %}
+      <p style="margin:0; font-size:13px; color:#888;">Web: {{ negocio_web }}</p>
+      {% endif %}
+    </td>
+  </tr>
+
+  <!-- Footer -->
+  <tr>
+    <td style="padding:20px 40px 24px 40px; background-color:#fafafa; border-top:1px solid #f0f0f0;">
+      <p style="margin:0; font-size:11px; color:#bbb; text-align:center;">
+        Propuesta generada automaticamente con
+        <a href="https://tikno.pro" style="color:{{ color_primario }}; text-decoration:none; font-weight:600;">Tikno</a>
+      </p>
+    </td>
+  </tr>
+
+{% if tracking_url %}
+<img src="{{ tracking_url }}" width="1" height="1" alt="" style="display:block;width:1px;height:1px;border:0;" />
+{% endif %}
+
+</table>
+</td>
+</tr>
+</table>
+</body>
+</html>

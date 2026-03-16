@@ -12,6 +12,8 @@ export function usePerfil() {
     queryKey: ["perfil"],
     queryFn: () => apiFetch("/auth/me/", { token }),
     enabled: !!token,
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   })
 }
 

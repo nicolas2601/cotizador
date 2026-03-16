@@ -236,3 +236,8 @@ GROQ_MODEL = config("GROQ_MODEL", default="llama-3.3-70b-versatile")
 
 # Compatibilidad con config anterior
 OLLAMA_CLOUD_API_KEY = config("OLLAMA_CLOUD_API_KEY", default=GROQ_API_KEY)
+
+# ==============================================================================
+# FRONTEND
+# ==============================================================================
+FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:3000")

@@ -3,6 +3,7 @@ export type CampoTipo = "texto" | "numero" | "seleccion" | "multiple" | "area_m2
 export interface OpcionCampo {
   label: string
   valor: string
+  descripcion?: string
 }
 
 export interface Campo {

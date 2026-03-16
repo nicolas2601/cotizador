@@ -15,8 +15,8 @@ export function ProspectFormWrapper({ cotizador, slug }: Props) {
   const { iniciar, enviado } = useProspectFormStore()
 
   useEffect(() => {
-    iniciar(slug)
-  }, [slug, iniciar])
+    iniciar(slug, cotizador.id)
+  }, [slug, cotizador.id, iniciar])
 
   if (enviado) {
     return (
@@ -25,7 +25,7 @@ export function ProspectFormWrapper({ cotizador, slug }: Props) {
         negocioLogo={cotizador.negocio_logo}
         onReset={() => {
           useProspectFormStore.getState().reset()
-          useProspectFormStore.getState().iniciar(slug)
+          useProspectFormStore.getState().iniciar(slug, cotizador.id)
         }}
       />
     )

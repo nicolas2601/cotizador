@@ -61,7 +61,7 @@ export default function RegistroPage() {
 
       login(data)
       toast.success("Cuenta creada correctamente")
-      router.push("/cotizadores")
+      router.push("/onboarding")
     } catch (err: any) {
       toast.error(err.message || "Error al crear la cuenta")
     } finally {

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Plus, ExternalLink, Pencil, Copy, Sparkles, Trash2 } from "lucide-react"
+import { Plus, ExternalLink, Pencil, Copy, Sparkles, Trash2, Code, LayoutGrid } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -86,12 +86,20 @@ export default function CotizadoresPage() {
             Crea y gestiona tus formularios de cotizacion
           </p>
         </div>
-        <Button asChild className="cursor-pointer bg-gradient-to-r from-primary to-[oklch(0.55_0.16_310)] text-white shadow-md shadow-primary/20 transition-all duration-200 hover:shadow-lg hover:shadow-primary/30 hover:brightness-110">
-          <a href="/cotizadores/nuevo">
-            <Plus className="mr-2 h-4 w-4" />
-            Nuevo cotizador
-          </a>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" asChild className="cursor-pointer gap-2 border-primary/30 text-primary transition-all duration-200 hover:bg-primary/5 hover:border-primary/50">
+            <a href="/cotizadores/templates">
+              <LayoutGrid className="h-4 w-4" />
+              Plantillas
+            </a>
+          </Button>
+          <Button asChild className="cursor-pointer bg-gradient-to-r from-primary to-[oklch(0.55_0.16_310)] text-white shadow-md shadow-primary/20 transition-all duration-200 hover:shadow-lg hover:shadow-primary/30 hover:brightness-110">
+            <a href="/cotizadores/nuevo">
+              <Plus className="mr-2 h-4 w-4" />
+              Nuevo cotizador
+            </a>
+          </Button>
+        </div>
       </div>
 
       {loading ? (
@@ -134,6 +142,12 @@ export default function CotizadoresPage() {
                   </Button>
                 }
               />
+              <Button variant="outline" asChild className="cursor-pointer gap-2 border-primary/30 text-primary transition-all duration-200 hover:bg-primary/5 hover:border-primary/50">
+                <a href="/cotizadores/templates">
+                  <LayoutGrid className="h-4 w-4" />
+                  Plantillas
+                </a>
+              </Button>
             </div>
           </div>
         </Card>
@@ -192,6 +206,11 @@ export default function CotizadoresPage() {
                     <a href={`/cotizadores/${cot.id}`}>
                       <Pencil className="mr-1.5 h-3.5 w-3.5" />
                       Editar
+                    </a>
+                  </Button>
+                  <Button variant="ghost" size="icon-sm" asChild title="Widget" className="cursor-pointer transition-colors duration-200 hover:text-primary">
+                    <a href={`/cotizadores/${cot.id}/embed`}>
+                      <Code className="h-3.5 w-3.5" />
                     </a>
                   </Button>
                   <Button

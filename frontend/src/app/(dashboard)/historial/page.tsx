@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { FileText, Filter } from "lucide-react"
+import { FileText, Filter, Download } from "lucide-react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -27,6 +28,34 @@ export default function HistorialPage() {
   const [selected, setSelected] = useState<Cotizacion | null>(null)
   const [filtroEstado, setFiltroEstado] = useState<string>("todos")
   const [busqueda, setBusqueda] = useState("")
+
+  function exportarCSV() {
+    const headers = ["Fecha", "Prospecto", "Email", "Telefono", "Empresa", "Cotizador", "Total", "Moneda", "Estado"]
+    const rows = filtradas.map((c) => [
+      new Date(c.created_at).toLocaleDateString("es-CO"),
+      c.prospecto_nombre,
+      c.prospecto_email,
+      c.prospecto_telefono,
+      c.prospecto_empresa,
+      c.cotizador_nombre,
+      c.total,
+      c.moneda,
+      c.estado,
+    ])
+
+    const csvContent = [headers, ...rows]
+      .map((row) => row.map((cell) => `"${String(cell || "").replace(/"/g, '""')}"`).join(","))
+      .join("\n")
+
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `cotizaciones_${new Date().toISOString().split("T")[0]}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+    toast.success("CSV exportado")
+  }
 
   const filtradas = (cotizaciones || []).filter((c) => {
     if (filtroEstado !== "todos" && c.estado !== filtroEstado) return false
@@ -74,6 +103,16 @@ export default function HistorialPage() {
             ))}
           </SelectContent>
         </Select>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={exportarCSV}
+          disabled={filtradas.length === 0}
+          className="h-9 gap-1.5 cursor-pointer transition-colors duration-200 hover:border-primary/40 hover:text-primary"
+        >
+          <Download className="h-3.5 w-3.5" />
+          Exportar CSV
+        </Button>
       </div>
 
       {/* Tabla */}

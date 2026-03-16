@@ -41,7 +41,7 @@ export default function LoginPage() {
 
       login(data)
       toast.success("Sesion iniciada")
-      router.push("/cotizadores")
+      router.push("/dashboard")
     } catch (err: any) {
       toast.error(err.message || "Credenciales invalidas")
     } finally {

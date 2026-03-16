@@ -51,6 +51,11 @@ class Cotizacion(BaseModel):
     # Notas internas
     notas = models.TextField(blank=True)
 
+    # Token de aceptacion publica
+    token_aceptacion = models.CharField(max_length=64, blank=True, db_index=True)
+    fecha_aceptacion = models.DateTimeField(null=True, blank=True)
+    ip_aceptacion = models.GenericIPAddressField(null=True, blank=True)
+
     class Meta:
         verbose_name = "cotizacion"
         verbose_name_plural = "cotizaciones"
@@ -58,3 +63,9 @@ class Cotizacion(BaseModel):
 
     def __str__(self):
         return f"Cotizacion {self.prospecto_nombre} - ${self.total:,.0f} {self.moneda}"
+
+    def generar_token(self):
+        import secrets
+        self.token_aceptacion = secrets.token_urlsafe(32)
+        self.save(update_fields=["token_aceptacion"])
+        return self.token_aceptacion

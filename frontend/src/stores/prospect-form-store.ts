@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware"
 
 interface ProspectFormState {
   cotizadorSlug: string
+  cotizadorId: string
   respuestas: Record<string, string>
   pasoActual: number
   enviado: boolean
@@ -17,7 +18,7 @@ interface ProspectFormState {
   setPasoActual: (paso: number) => void
   setProspecto: (data: Partial<ProspectFormState["prospecto"]>) => void
   setEnviado: (enviado: boolean) => void
-  iniciar: (slug: string) => void
+  iniciar: (slug: string, cotizadorId?: string) => void
   reset: () => void
 }
 
@@ -25,6 +26,7 @@ export const useProspectFormStore = create<ProspectFormState>()(
   persist(
     (set) => ({
       cotizadorSlug: "",
+      cotizadorId: "",
       respuestas: {},
       pasoActual: 0,
       enviado: false,
@@ -40,11 +42,14 @@ export const useProspectFormStore = create<ProspectFormState>()(
 
       setEnviado: (enviado) => set({ enviado }),
 
-      iniciar: (slug) =>
+      iniciar: (slug, cotizadorId) =>
         set((s) => {
-          if (s.cotizadorSlug === slug && !s.enviado) return {}
+          // Reset si cambio el cotizador (diferente ID o slug) o si ya fue enviado
+          const mismoId = cotizadorId && s.cotizadorId === cotizadorId
+          if (s.cotizadorSlug === slug && mismoId && !s.enviado) return {}
           return {
             cotizadorSlug: slug,
+            cotizadorId: cotizadorId || "",
             respuestas: {},
             pasoActual: 0,
             enviado: false,
@@ -55,6 +60,7 @@ export const useProspectFormStore = create<ProspectFormState>()(
       reset: () =>
         set({
           cotizadorSlug: "",
+          cotizadorId: "",
           respuestas: {},
           pasoActual: 0,
           enviado: false,

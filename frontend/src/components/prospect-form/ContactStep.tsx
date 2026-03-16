@@ -30,6 +30,13 @@ function getDisplayValue(cotizador: CotizadorPublico, campoId: string, valor: st
           const opcion = campo.opciones.find((o) => o.valor === valor)
           if (opcion) return opcion.label
         }
+        if (campo.tipo === "multiple" && campo.opciones) {
+          const selected = valor ? valor.split("|") : []
+          const labels = selected
+            .map((v) => campo.opciones!.find((o) => o.valor === v)?.label)
+            .filter(Boolean)
+          return labels.length > 0 ? labels.join(", ") : valor
+        }
         if (campo.tipo === "area_m2") return `${valor} ${campo.unidad || "m\u00B2"}`
         if (campo.tipo === "slider") return `${valor} ${campo.unidad || ""}`
       }

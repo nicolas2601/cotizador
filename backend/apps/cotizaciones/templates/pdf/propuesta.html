@@ -4,12 +4,20 @@
 <head>
 <meta charset="UTF-8">
 <style>
-    @page { size: letter; margin: 1.8cm 2cm; }
+    @page {
+        size: letter;
+        margin: 1.5cm 2cm 2cm 2cm;
+        @bottom-right {
+            content: "Pagina " counter(page) " de " counter(pages);
+            font-size: 7pt;
+            color: #bbb;
+        }
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
         color: #2d2d2d;
-        font-size: 10pt;
+        font-size: 9.5pt;
         line-height: 1.55;
     }
 
@@ -18,153 +26,284 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding-bottom: 14px;
-        margin-bottom: 20px;
-        border-bottom: 2px solid {{ color_primario }};
+        padding-bottom: 16px;
+        margin-bottom: 22px;
+        border-bottom: 3px solid {{ color_primario }};
     }
-    .header-logo img { max-height: 44px; }
-    .header-brand { font-size: 18pt; font-weight: 700; color: {{ color_primario }}; }
+    .header-logo img {
+        max-height: 50px;
+        max-width: 180px;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        display: block;
+    }
+    .header-brand {
+        font-size: 20pt;
+        font-weight: 800;
+        color: {{ color_primario }};
+        letter-spacing: -0.5px;
+    }
     .header-right { text-align: right; }
-    .header-right .titulo { font-size: 16pt; font-weight: 700; color: {{ color_primario }}; }
-    .header-right .meta { font-size: 8pt; color: #999; margin-top: 2px; }
+    .header-right .titulo {
+        font-size: 14pt;
+        font-weight: 800;
+        color: {{ color_primario }};
+        letter-spacing: -0.3px;
+    }
+    .header-right .numero {
+        font-size: 11pt;
+        font-weight: 700;
+        color: #444;
+        margin-top: 2px;
+    }
+    .header-right .meta {
+        font-size: 8pt;
+        color: #999;
+        margin-top: 4px;
+    }
+
+    /* === BADGE VALIDEZ === */
+    .validez-badge {
+        display: inline-block;
+        background: {{ color_primario }};
+        color: white;
+        font-size: 7.5pt;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 10px;
+        margin-top: 4px;
+        letter-spacing: 0.3px;
+    }
 
     /* === GRID DOS COLUMNAS === */
     .grid-2 {
         display: flex;
-        gap: 24px;
-        margin-bottom: 18px;
+        margin-bottom: 20px;
     }
     .grid-2 .col { flex: 1; }
+    .grid-2 .col:first-child { margin-right: 20px; }
 
     /* === CARDS === */
     .card {
-        border: 1px solid #e8e8e8;
-        border-radius: 6px;
-        padding: 12px 14px;
+        border: 1px solid #e4e4e4;
+        border-radius: 8px;
+        padding: 14px 16px;
         margin-bottom: 16px;
+        background: #fefefe;
     }
     .card-header {
-        font-size: 8pt;
-        font-weight: 600;
+        font-size: 7.5pt;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 1.2px;
         color: {{ color_primario }};
-        margin-bottom: 8px;
-        padding-bottom: 4px;
+        margin-bottom: 10px;
+        padding-bottom: 6px;
         border-bottom: 1px solid #f0f0f0;
     }
     .card-row {
         display: flex;
         justify-content: space-between;
-        padding: 2px 0;
-        font-size: 9.5pt;
+        padding: 3px 0;
+        font-size: 9pt;
     }
-    .card-label { color: #888; }
-    .card-value { font-weight: 500; text-align: right; max-width: 60%; }
+    .card-label { color: #888; font-weight: 400; }
+    .card-value { font-weight: 600; color: #333; text-align: right; max-width: 60%; }
 
     /* === SECCION === */
-    .seccion { margin-bottom: 16px; }
+    .seccion { margin-bottom: 18px; }
     .seccion-titulo {
         font-size: 10pt;
-        font-weight: 700;
+        font-weight: 800;
         color: {{ color_primario }};
-        margin-bottom: 8px;
-        padding-bottom: 3px;
-        border-bottom: 1px solid #eee;
+        margin-bottom: 10px;
+        padding-bottom: 4px;
+        border-bottom: 2px solid #f0f0f0;
+        letter-spacing: -0.2px;
     }
 
     /* === DESCRIPCION IA === */
     .descripcion {
-        background: #fafafa;
-        border-left: 3px solid {{ color_primario }};
-        padding: 12px 14px;
-        font-size: 9.5pt;
-        line-height: 1.65;
+        background: linear-gradient(135deg, #fafafa, #f5f3ff);
+        border-left: 4px solid {{ color_primario }};
+        border-radius: 0 8px 8px 0;
+        padding: 14px 16px;
+        font-size: 9pt;
+        line-height: 1.7;
     }
     .descripcion p { margin-bottom: 8px; }
     .descripcion p:last-child { margin-bottom: 0; }
 
+    /* === TABLA SELECCIONES DEL CLIENTE === */
+    .selecciones-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-top: 8px;
+        font-size: 9pt;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #e4e4e4;
+    }
+    .selecciones-table thead th {
+        background: #f8f9fa;
+        color: #555;
+        padding: 8px 14px;
+        font-size: 7.5pt;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        text-align: left;
+        border-bottom: 2px solid #e4e4e4;
+    }
+    .selecciones-table thead th:last-child { text-align: right; }
+    .selecciones-table tbody td {
+        padding: 8px 14px;
+        border-bottom: 1px solid #f2f2f2;
+        font-size: 9pt;
+    }
+    .selecciones-table tbody td:last-child {
+        text-align: right;
+        font-family: 'Courier New', monospace;
+        font-weight: 600;
+        color: {{ color_primario }};
+    }
+    .selecciones-table tbody tr:nth-child(even) { background: #fafafc; }
+    .selecciones-table tbody tr:last-child td { border-bottom: none; }
+    .campo-label {
+        font-size: 7pt;
+        color: #999;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
     /* === TABLA PRECIOS === */
     .precio-table {
         width: 100%;
-        border-collapse: collapse;
-        margin-top: 6px;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-top: 8px;
         font-size: 9.5pt;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #e4e4e4;
     }
     .precio-table thead th {
         background: {{ color_primario }};
         color: white;
-        padding: 7px 10px;
-        font-size: 8pt;
-        font-weight: 600;
+        padding: 10px 14px;
+        font-size: 7.5pt;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.8px;
         text-align: left;
     }
     .precio-table thead th:last-child { text-align: right; }
     .precio-table tbody td {
-        padding: 6px 10px;
+        padding: 9px 14px;
         border-bottom: 1px solid #f2f2f2;
     }
     .precio-table tbody td:last-child {
         text-align: right;
         font-family: 'Courier New', monospace;
+        font-weight: 600;
         font-size: 9.5pt;
     }
-    .precio-table tbody tr:nth-child(even) { background: #fcfcfc; }
+    .precio-table tbody tr:nth-child(even) { background: #fafafc; }
+    .precio-table tbody tr:last-child td { border-bottom: none; }
 
-    /* Subtotal y total */
-    .totales {
-        margin-top: 8px;
-        border-top: 2px solid {{ color_primario }};
-        padding-top: 8px;
-    }
-    .totales-row {
+    /* === TOTAL HIGHLIGHT === */
+    .total-box {
+        margin-top: 12px;
+        background: {{ color_primario }};
+        border-radius: 10px;
+        padding: 16px 20px;
         display: flex;
         justify-content: space-between;
-        padding: 3px 10px;
-        font-size: 10pt;
+        align-items: center;
     }
-    .totales-row.total {
-        font-size: 13pt;
+    .total-label {
+        color: rgba(255,255,255,0.85);
+        font-size: 10pt;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .total-valor {
+        color: white;
+        font-size: 18pt;
+        font-weight: 800;
+        font-family: 'Courier New', monospace;
+        letter-spacing: -0.5px;
+    }
+
+    .subtotal-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 14px;
+        margin-top: 8px;
+        font-size: 9.5pt;
+        color: #666;
+    }
+    .subtotal-row span:last-child {
+        font-family: 'Courier New', monospace;
+        font-weight: 600;
+    }
+
+    /* === PROXIMOS PASOS === */
+    .pasos-box {
+        background: #f8f9ff;
+        border: 1px solid #e8e8f0;
+        border-radius: 8px;
+        padding: 14px 16px;
+        margin-top: 18px;
+    }
+    .pasos-titulo {
+        font-size: 9pt;
         font-weight: 700;
         color: {{ color_primario }};
-        margin-top: 4px;
-        padding-top: 6px;
+        margin-bottom: 6px;
+    }
+    .pasos-texto {
+        font-size: 8.5pt;
+        color: #666;
+        line-height: 1.6;
     }
 
     /* === CONDICIONES === */
     .condiciones {
-        margin-top: 18px;
-        padding-top: 10px;
-        border-top: 1px solid #e0e0e0;
+        margin-top: 20px;
+        padding-top: 12px;
+        border-top: 1px solid #e4e4e4;
     }
     .condiciones-titulo {
-        font-size: 8pt;
-        font-weight: 600;
+        font-size: 7.5pt;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #999;
-        margin-bottom: 5px;
+        letter-spacing: 1px;
+        color: #bbb;
+        margin-bottom: 8px;
     }
     .condiciones-grid {
         display: flex;
-        gap: 16px;
     }
     .condiciones-col { flex: 1; }
+    .condiciones-col:first-child { margin-right: 16px; }
     .condiciones-item {
         font-size: 7.5pt;
         color: #aaa;
-        padding: 1.5px 0 1.5px 8px;
+        padding: 2px 0 2px 10px;
         position: relative;
+        line-height: 1.5;
     }
     .condiciones-item:before {
         content: "";
         position: absolute;
         left: 0;
-        top: 6px;
-        width: 3px;
-        height: 3px;
+        top: 7px;
+        width: 4px;
+        height: 4px;
         border-radius: 50%;
         background: {{ color_primario }};
     }
@@ -177,10 +316,16 @@
         right: 0;
         display: flex;
         justify-content: space-between;
-        padding: 8px 2cm;
+        align-items: center;
+        padding: 10px 2cm;
         font-size: 7pt;
         color: #ccc;
         border-top: 1px solid #f0f0f0;
+        background: #fefefe;
+    }
+    .footer-brand {
+        font-weight: 700;
+        color: #ddd;
     }
 </style>
 </head>
@@ -188,7 +333,7 @@
 
 <!-- HEADER -->
 <div class="header">
-    <div>
+    <div class="header-logo">
         {% if negocio_logo %}
         <img src="{{ negocio_logo }}" alt="{{ negocio_nombre }}">
         {% else %}
@@ -197,7 +342,9 @@
     </div>
     <div class="header-right">
         <div class="titulo">Propuesta Comercial</div>
-        <div class="meta">{{ fecha }} | Ref: {{ cotizacion_id|truncatechars:8 }}</div>
+        <div class="numero">{{ numero_cotizacion }}</div>
+        <div class="meta">{{ fecha }}</div>
+        <div class="validez-badge">Valida hasta {{ fecha_vencimiento }}</div>
     </div>
 </div>
 
@@ -205,13 +352,13 @@
 <div class="grid-2">
     <div class="col">
         <div class="card">
-            <div class="card-header">Empresa</div>
+            <div class="card-header">De</div>
             <div class="card-row">
-                <span class="card-value" style="max-width:100%; font-weight:600;">{{ negocio_nombre }}</span>
+                <span class="card-value" style="max-width:100%; font-weight:700; font-size:10pt;">{{ negocio_nombre }}</span>
             </div>
             {% if negocio_telefono %}
             <div class="card-row">
-                <span class="card-label">Tel</span>
+                <span class="card-label">Telefono</span>
                 <span class="card-value">{{ negocio_telefono }}</span>
             </div>
             {% endif %}
@@ -237,9 +384,9 @@
     </div>
     <div class="col">
         <div class="card">
-            <div class="card-header">Cliente</div>
+            <div class="card-header">Para</div>
             <div class="card-row">
-                <span class="card-value" style="max-width:100%; font-weight:600;">{{ prospecto_nombre }}</span>
+                <span class="card-value" style="max-width:100%; font-weight:700; font-size:10pt;">{{ prospecto_nombre }}</span>
             </div>
             {% if prospecto_empresa %}
             <div class="card-row">
@@ -253,13 +400,50 @@
             </div>
             {% if prospecto_telefono %}
             <div class="card-row">
-                <span class="card-label">Tel</span>
+                <span class="card-label">Telefono</span>
                 <span class="card-value">{{ prospecto_telefono }}</span>
             </div>
             {% endif %}
         </div>
     </div>
 </div>
+
+<!-- ESPECIFICACIONES DEL PROYECTO -->
+{% if opciones_seleccionadas %}
+<div class="seccion">
+    <div class="seccion-titulo">Especificaciones del Proyecto</div>
+    <table class="selecciones-table">
+        <thead>
+            <tr>
+                <th style="width:35%">Concepto</th>
+                <th style="width:40%">Seleccion del Cliente</th>
+                <th style="width:25%">Valor</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in opciones_seleccionadas %}
+            <tr>
+                <td><span class="campo-label">{{ item.campo }}</span></td>
+                <td>{{ item.opcion }}</td>
+                <td>{% if item.precio %}{{ item.precio|formato_cop }} {{ moneda }}{% else %}—{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- NOTAS DEL CLIENTE -->
+{% if notas_cliente %}
+<div class="seccion">
+    <div class="card" style="background: #f8f9ff; border-color: #e8e8f0;">
+        <div class="card-header">Notas del Cliente</div>
+        <div style="font-size: 9pt; color: #555; line-height: 1.6; font-style: italic;">
+            "{{ notas_cliente }}"
+        </div>
+    </div>
+</div>
+{% endif %}
 
 <!-- DESCRIPCION DEL SERVICIO -->
 {% if descripcion_parrafos %}
@@ -279,7 +463,7 @@
     <table class="precio-table">
         <thead>
             <tr>
-                <th style="width:60%">Concepto</th>
+                <th style="width:65%">Concepto</th>
                 <th>Valor</th>
             </tr>
         </thead>
@@ -292,17 +476,27 @@
             {% endfor %}
         </tbody>
     </table>
-    <div class="totales">
-        {% if desglose|length > 1 %}
-        <div class="totales-row">
-            <span>Subtotal</span>
-            <span style="font-family:'Courier New',monospace;">{{ subtotal|formato_cop }} {{ moneda }}</span>
-        </div>
-        {% endif %}
-        <div class="totales-row total">
-            <span>Total</span>
-            <span style="font-family:'Courier New',monospace;">{{ total|formato_cop }} {{ moneda }}</span>
-        </div>
+
+    {% if desglose|length > 1 %}
+    <div class="subtotal-row">
+        <span>Subtotal</span>
+        <span>{{ subtotal|formato_cop }} {{ moneda }}</span>
+    </div>
+    {% endif %}
+
+    <div class="total-box">
+        <span class="total-label">Total Inversion</span>
+        <span class="total-valor">{{ total|formato_cop }} {{ moneda }}</span>
+    </div>
+</div>
+
+<!-- PROXIMOS PASOS -->
+<div class="pasos-box">
+    <div class="pasos-titulo">Proximos Pasos</div>
+    <div class="pasos-texto">
+        Para aceptar esta propuesta, responda a este correo{% if negocio_telefono %} o contactenos al <strong>{{ negocio_telefono }}</strong>{% endif %}.
+        Una vez confirmada, coordinaremos los detalles de inicio y el cronograma del proyecto.
+        Esta propuesta tiene validez hasta el <strong>{{ fecha_vencimiento }}</strong>.
     </div>
 </div>
 
@@ -325,8 +519,8 @@
 
 <!-- FOOTER -->
 <div class="footer">
-    <span>{{ negocio_nombre }}{% if negocio_web %} | {{ negocio_web }}{% endif %}</span>
-    <span>Generado con Tikno Cotizador</span>
+    <span class="footer-brand">{{ negocio_nombre }}{% if negocio_web %} &middot; {{ negocio_web }}{% endif %}</span>
+    <span>{{ numero_cotizacion }} &middot; Generado con Tikno</span>
 </div>
 
 </body>

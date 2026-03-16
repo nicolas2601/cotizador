@@ -37,7 +37,7 @@ export function FieldEditor({ pasoId, campo }: FieldEditorProps) {
     update({ opciones })
   }
 
-  function actualizarOpcion(index: number, key: "label" | "valor", value: string) {
+  function actualizarOpcion(index: number, key: "label" | "valor" | "descripcion", value: string) {
     const opciones = [...(campo.opciones || [])]
     opciones[index] = { ...opciones[index], [key]: value }
     update({ opciones })
@@ -109,26 +109,34 @@ export function FieldEditor({ pasoId, campo }: FieldEditorProps) {
             </Button>
           </div>
           {(campo.opciones || []).map((opcion, i) => (
-            <div key={i} className="flex items-center gap-2">
+            <div key={i} className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Input
+                  placeholder="Label"
+                  value={opcion.label}
+                  onChange={(e) => actualizarOpcion(i, "label", e.target.value)}
+                  className="h-7 text-xs"
+                />
+                <Input
+                  placeholder="Valor (COP)"
+                  value={opcion.valor}
+                  onChange={(e) => actualizarOpcion(i, "valor", e.target.value)}
+                  className="h-7 w-28 text-xs"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={() => eliminarOpcion(i)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
               <Input
-                placeholder="Label"
-                value={opcion.label}
-                onChange={(e) => actualizarOpcion(i, "label", e.target.value)}
-                className="h-7 text-xs"
+                placeholder="Descripcion (que incluye esta opcion)"
+                value={opcion.descripcion || ""}
+                onChange={(e) => actualizarOpcion(i, "descripcion", e.target.value)}
+                className="h-6 text-xs text-muted-foreground"
               />
-              <Input
-                placeholder="Valor (COP)"
-                value={opcion.valor}
-                onChange={(e) => actualizarOpcion(i, "valor", e.target.value)}
-                className="h-7 w-28 text-xs"
-              />
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                onClick={() => eliminarOpcion(i)}
-              >
-                <X className="h-3 w-3" />
-              </Button>
             </div>
           ))}
         </div>

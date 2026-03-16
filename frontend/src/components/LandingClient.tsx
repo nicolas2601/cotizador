@@ -100,7 +100,38 @@ export default function LandingClient() {
   return (
     <div className="min-h-screen bg-[#020617] text-slate-200 font-sans selection:bg-indigo-500 selection:text-white overflow-x-hidden">
       <NoiseOverlay />
-      
+
+      {/* --- NAVBAR --- */}
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#020617]/80 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <Link href="/" className="text-2xl font-[900] text-white tracking-[-0.04em]">
+            TIKNO<span className="text-indigo-500">.</span>
+          </Link>
+          <nav className="hidden sm:flex items-center gap-8">
+            <Link href="/pricing" className="text-[11px] font-[800] uppercase tracking-[0.3em] text-slate-400 hover:text-white transition-colors duration-300">
+              Precios
+            </Link>
+            <Link href="/docs" className="text-[11px] font-[800] uppercase tracking-[0.3em] text-slate-400 hover:text-white transition-colors duration-300">
+              Docs
+            </Link>
+          </nav>
+          <div className="flex items-center gap-4">
+            <Link href="/login" className="text-sm font-semibold text-slate-400 hover:text-white transition-colors duration-300">
+              Iniciar sesion
+            </Link>
+            <Link href="/registro">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
+                className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-[800] rounded-full transition-colors duration-300"
+              >
+                Empezar gratis
+              </motion.button>
+            </Link>
+          </div>
+        </div>
+      </header>
+
       {/* --- BACKGROUND AMBIENCE --- */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <ParallaxElement speed={-0.15}>
@@ -153,7 +184,7 @@ export default function LandingClient() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
-            <Link href="/cotizadores">
+            <Link href="/registro">
               <motion.button 
                 whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(99, 102, 241, 0.4)" }}
                 whileTap={{ scale: 0.98 }}
@@ -322,7 +353,7 @@ export default function LandingClient() {
             <p className="text-2xl md:text-3xl text-slate-500 mb-20 max-w-2xl mx-auto font-light tracking-tight leading-snug">
               Únete a las agencias que ya están operando a la velocidad del software.
             </p>
-            <Link href="/cotizadores">
+            <Link href="/registro">
               <motion.button 
                 whileHover={{ scale: 1.05, boxShadow: "0 30px 60px rgba(99, 102, 241, 0.4)" }}
                 whileTap={{ scale: 0.98 }}
@@ -345,9 +376,10 @@ export default function LandingClient() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12">
           <div className="text-3xl font-[900] text-white tracking-[-0.06em]">TIKNO<span className="text-indigo-500">.</span></div>
           <div className="flex gap-12 text-slate-500 text-[10px] font-black uppercase tracking-[0.4em]">
-            <a href="#" className="hover:text-white transition-colors duration-300">Privacidad</a>
-            <a href="#" className="hover:text-white transition-colors duration-300">Términos</a>
-            <a href="#" className="hover:text-white transition-colors duration-300">Soporte</a>
+            <Link href="/pricing" className="hover:text-white transition-colors duration-300">Precios</Link>
+            <Link href="#" className="hover:text-white transition-colors duration-300">Privacidad</Link>
+            <Link href="#" className="hover:text-white transition-colors duration-300">Terminos</Link>
+            <Link href="#" className="hover:text-white transition-colors duration-300">Soporte</Link>
           </div>
           <p className="text-slate-600 text-[10px] font-bold tracking-widest uppercase">Bucaramanga, Col • 2026</p>
         </div>

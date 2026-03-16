@@ -17,8 +17,75 @@ from .prompts import prompt_generar_cotizador
 logger = logging.getLogger(__name__)
 
 CAMPOS_REQUERIDOS_COTIZADOR = {"nombre", "slug", "descripcion", "configuracion"}
+
+
+def _encontrar_campo_similar(variable: str, campo_ids: set) -> str | None:
+    """Busca el campo ID mas parecido a una variable invalida en la formula.
+
+    Ej: 'tipo_sitio' -> 'tipo_sitio_web', 'funcionalidades' -> 'funcionalidades_extra'
+    """
+    if not campo_ids:
+        return None
+
+    # 1. Match exacto parcial: la variable es subcadena de un campo o viceversa
+    for campo_id in campo_ids:
+        if variable in campo_id or campo_id in variable:
+            return campo_id
+
+    # 2. Match por palabras en comun
+    var_parts = set(variable.split("_"))
+    mejor = None
+    mejor_score = 0
+    for campo_id in campo_ids:
+        campo_parts = set(campo_id.split("_"))
+        comunes = var_parts & campo_parts
+        score = len(comunes) / max(len(var_parts), len(campo_parts))
+        if score > mejor_score:
+            mejor_score = score
+            mejor = campo_id
+
+    # Solo retornar si hay al menos 50% de coincidencia
+    if mejor_score >= 0.5:
+        return mejor
+
+    return None
 CAMPOS_REQUERIDOS_REGLA = {"nombre", "formula", "variables", "prioridad"}
 TIPOS_CAMPO_VALIDOS = {"texto", "numero", "seleccion", "multiple", "area_m2", "slider"}
+
+
+def _forzar_formulas_consistentes(data: dict) -> None:
+    """Reconstruye las formulas para usar EXACTAMENTE los IDs de los campos generados.
+
+    La IA frecuentemente genera formulas con variables que no coinciden con los IDs
+    de los campos (ej: campo='tipo_sitio_web' pero formula dice 'tipo_sitio').
+    Esta funcion SIEMPRE reconstruye la formula como suma de los campos con precio.
+    """
+    config = data.get("configuracion", {})
+    pasos = config.get("pasos", [])
+
+    # Recopilar campos que afectan el precio (no texto)
+    campo_ids_precio = []
+    for paso in pasos:
+        for campo in paso.get("campos", []):
+            cid = campo.get("id", "")
+            if cid and campo.get("tipo") != "texto":
+                campo_ids_precio.append(cid)
+
+    if not campo_ids_precio:
+        return
+
+    # Reconstruir SIEMPRE la formula como suma de campos con precio
+    formula_correcta = " + ".join(campo_ids_precio)
+
+    reglas = data.get("reglas_precio", [])
+    for regla in reglas:
+        formula_original = regla.get("formula", "")
+        regla["formula"] = formula_correcta
+        regla["variables"] = {}  # Limpiar variables fijas que podrian ser invalidas
+        if formula_original != formula_correcta:
+            logger.info(
+                f"Formula reconstruida: '{formula_original}' -> '{formula_correcta}'"
+            )
 
 
 def _extraer_json(texto: str) -> dict:
@@ -123,13 +190,21 @@ def _validar_estructura(data: dict) -> list[str]:
                 vars_invalidas = vars_en_formula - variables_validas
 
                 if vars_invalidas:
-                    # Auto-corregir: agregar variables faltantes como constantes
-                    for var in vars_invalidas:
-                        regla["variables"][var] = 1
-                    logger.warning(
-                        f"Regla {i}: variables {vars_invalidas} no existian como campos. "
-                        f"Agregadas como constantes con valor 1."
-                    )
+                    # Auto-corregir: buscar campo mas parecido y reemplazar en formula
+                    for var_mala in vars_invalidas:
+                        mejor_match = _encontrar_campo_similar(var_mala, campo_ids)
+                        if mejor_match:
+                            regla["formula"] = re.sub(
+                                rf"\b{re.escape(var_mala)}\b", mejor_match, regla["formula"]
+                            )
+                            logger.warning(
+                                f"Regla {i}: variable '{var_mala}' reemplazada por '{mejor_match}' en formula."
+                            )
+                        else:
+                            regla["variables"][var_mala] = 0
+                            logger.warning(
+                                f"Regla {i}: variable '{var_mala}' no tiene match, asignando 0."
+                            )
 
     return errores
 
@@ -168,6 +243,7 @@ class GenerarCotizadorView(APIView):
                 prompt=prompt,
                 system="Eres un asistente que genera configuraciones JSON para cotizadores de negocios colombianos. Responde UNICAMENTE con JSON valido.",
                 json_mode=True,
+                temperature=0.4,
             )
         except AIClientError as e:
             logger.error(f"Error al comunicarse con la IA: {e}")
@@ -185,6 +261,9 @@ class GenerarCotizadorView(APIView):
                 {"detail": "La IA genero una respuesta invalida. Intente nuevamente con una descripcion mas detallada."},
                 status=status.HTTP_422_UNPROCESSABLE_ENTITY,
             )
+
+        # Forzar consistencia: reconstruir formulas con IDs reales
+        _forzar_formulas_consistentes(data)
 
         # Validar la estructura
         errores = _validar_estructura(data)

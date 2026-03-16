@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Loader2, Sparkles } from "lucide-react"
+import { AlertTriangle, Loader2, Sparkles } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -56,7 +56,10 @@ export function AIGeneratorDialog({ trigger }: AIGeneratorDialogProps) {
         reglas_precio: data.reglas_precio ?? [],
       })
 
-      toast.success("Cotizador generado con IA")
+      toast.success("Cotizador generado con IA", {
+        description: "Revisa los campos, opciones y precios antes de publicar.",
+        duration: 6000,
+      })
       setOpen(false)
       setDescripcion("")
       router.push("/cotizadores/nuevo")
@@ -71,7 +74,7 @@ export function AIGeneratorDialog({ trigger }: AIGeneratorDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto mx-4">
         <DialogHeader>
           <DialogTitle>Generar cotizador con IA</DialogTitle>
           <DialogDescription>
@@ -81,12 +84,21 @@ export function AIGeneratorDialog({ trigger }: AIGeneratorDialogProps) {
         </DialogHeader>
 
         <Textarea
-          placeholder="Ej: Soy veterinario y quiero cotizar consultas y cirugias"
+          placeholder="Ej: Soy veterinario y quiero cotizar consultas y cirugias. Tengo servicios de consulta general, vacunacion, cirugia menor y cirugia mayor..."
           value={descripcion}
           onChange={(e) => setDescripcion(e.target.value)}
-          rows={4}
+          rows={6}
           disabled={loading}
+          className="min-h-[120px] max-h-[300px] resize-y overflow-y-auto break-words whitespace-pre-wrap"
         />
+
+        <div className="flex items-start gap-2 rounded-md bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+          <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
+            La IA genera una base que puede no ser perfecta. Revisa los precios, opciones y
+            campos antes de publicar. Puedes editar todo manualmente despues.
+          </p>
+        </div>
 
         <DialogFooter>
           <Button onClick={handleGenerar} disabled={loading || !descripcion.trim()}>

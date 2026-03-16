@@ -15,6 +15,11 @@ import {
   ListChecks,
   Zap,
   Globe,
+  MessageSquareText,
+  Copy,
+  Check,
+  Lightbulb,
+  AlertTriangle,
   type LucideIcon,
 } from "lucide-react"
 
@@ -98,6 +103,58 @@ function IndustryCard({
         </ul>
       </CardContent>
     </Card>
+  )
+}
+
+function PromptExample({
+  title,
+  prompt,
+}: {
+  title: string
+  prompt: string
+}) {
+  return (
+    <Card className="overflow-hidden shadow-sm transition-shadow duration-300 hover:shadow-md">
+      <div className="h-0.5 bg-gradient-to-r from-primary to-[oklch(0.55_0.16_310)]" />
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base flex items-center gap-2">
+          <MessageSquareText className="h-4 w-4 text-primary" />
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="rounded-lg bg-gradient-to-r from-primary/5 to-transparent border border-primary/10 p-4">
+          <p className="text-sm whitespace-pre-line leading-relaxed text-muted-foreground">
+            {prompt}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function TipItem({ text }: { text: string }) {
+  return (
+    <div className="flex items-start gap-3 rounded-lg border border-green-500/10 bg-green-500/3 p-3 transition-all duration-200">
+      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-green-500/10">
+        <Check className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+      </div>
+      <span className="text-sm">{text}</span>
+    </div>
+  )
+}
+
+function MistakeItem({ bad, why }: { bad: string; why: string }) {
+  return (
+    <div className="flex items-start gap-3 rounded-lg border border-red-500/10 bg-red-500/3 p-3 transition-all duration-200">
+      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-red-500/10">
+        <AlertTriangle className="h-3.5 w-3.5 text-red-500 dark:text-red-400" />
+      </div>
+      <div className="space-y-1">
+        <p className="text-sm font-medium">&quot;{bad}&quot;</p>
+        <p className="text-xs text-muted-foreground">{why}</p>
+      </div>
+    </div>
   )
 }
 
@@ -265,6 +322,263 @@ export default function DocsPage() {
             Este es el diferenciador clave de Tikno: en segundos tienes un cotizador
             funcional listo para compartir con tus clientes.
           </p>
+        </section>
+
+        <Separator />
+
+        {/* Section: Prompt perfecto para la IA */}
+        <section className="space-y-6">
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold tracking-tight">Como escribir el prompt perfecto</h2>
+            <Badge className="bg-gradient-to-r from-primary/15 to-[oklch(0.55_0.16_310/0.15)] text-primary border-primary/20">Guia</Badge>
+          </div>
+          <p className="text-muted-foreground leading-relaxed">
+            La IA genera mejores cotizadores cuando le das informacion clara y estructurada.
+            Sigue esta plantilla y obtendras un cotizador funcional al primer intento.
+          </p>
+
+          {/* Plantilla base */}
+          <Card className="overflow-hidden shadow-sm border-primary/20">
+            <div className="h-1 bg-gradient-to-r from-primary to-[oklch(0.55_0.16_310)]" />
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Lightbulb className="h-4 w-4 text-primary" />
+                Plantilla base — copia y adapta
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-lg bg-gradient-to-br from-primary/5 via-background to-[oklch(0.55_0.16_310/0.03)] border border-primary/15 p-5">
+                <p className="text-sm whitespace-pre-line leading-relaxed font-mono text-muted-foreground">
+{`Soy [TU PROFESION] en [CIUDAD], Colombia.
+
+MIS SERVICIOS Y PRECIOS:
+- [Servicio 1]: $[PRECIO] COP
+- [Servicio 2]: $[PRECIO] COP
+- [Servicio 3]: $[PRECIO] COP
+
+FACTORES QUE AFECTAN EL PRECIO:
+- [Factor 1]: desde $[MIN] hasta $[MAX] segun [QUE]
+- [Factor 2]: cada [UNIDAD] cuesta $[PRECIO]
+
+EXTRAS OPCIONALES (el cliente elige varios):
+- [Extra 1]: +$[PRECIO]
+- [Extra 2]: +$[PRECIO]
+
+COMO CALCULO EL PRECIO:
+[Tu logica. Ej: "Precio base + extras + cantidad * costo unitario"]
+
+MONEDA: COP`}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Ejemplos reales */}
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold">Ejemplos reales por tipo de negocio</h3>
+            <p className="text-sm text-muted-foreground">
+              Estos ejemplos generan cotizadores completos y funcionales al primer intento:
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <PromptExample
+              title="Disenador Web"
+              prompt={`Soy disenador web freelance en Bucaramanga, Colombia.
+
+MIS SERVICIOS Y PRECIOS:
+- Landing page (1 pagina): $800.000 COP
+- Sitio web corporativo (hasta 5 paginas): $2.500.000 COP
+- Tienda online con carrito: $4.000.000 COP
+- Aplicacion web personalizada: $7.000.000 COP
+
+FACTORES QUE AFECTAN EL PRECIO:
+- Paginas adicionales: cada pagina extra cuesta $300.000
+- Nivel de diseno: basico sin costo extra, premium +$500.000, ultra personalizado +$1.200.000
+
+EXTRAS OPCIONALES:
+- Logo profesional: +$400.000
+- SEO basico: +$350.000
+- Dominio y hosting 1 ano: +$250.000
+- Mantenimiento 3 meses: +$600.000
+- Integracion WhatsApp Business: +$150.000
+
+COMO CALCULO EL PRECIO:
+tipo_sitio + nivel_diseno + (paginas_extra * 300000) + extras
+
+MONEDA: COP`}
+            />
+
+            <PromptExample
+              title="Imprenta"
+              prompt={`Soy dueno de una imprenta en Medellin, Colombia.
+
+MIS SERVICIOS Y PRECIOS:
+- Tarjetas de presentacion (100 und): $45.000 COP
+- Volantes (100 und): $35.000 COP
+- Brochures plegables (100 und): $85.000 COP
+- Pendones banner (1 und): $65.000 COP
+
+FACTORES QUE AFECTAN EL PRECIO:
+- Cantidad: precio base por 100 und, se multiplica (200=x2, 500=x5)
+- Tamano: estandar sin recargo, grande +30%, extragrande +60%
+
+EXTRAS OPCIONALES:
+- Plastificado UV: +$25.000
+- Troquelado especial: +$35.000
+- Diseno grafico: +$50.000
+- Entrega express 24h: +$30.000
+
+COMO CALCULO EL PRECIO:
+(producto_base * factor_tamano * paquetes_cantidad) + extras
+
+MONEDA: COP`}
+            />
+
+            <PromptExample
+              title="Fotografo"
+              prompt={`Soy fotografo profesional de eventos en Bogota, Colombia.
+
+MIS SERVICIOS Y PRECIOS:
+- Sesion retrato (1 hora): $250.000 COP
+- Evento social (4 horas): $800.000 COP
+- Matrimonio completo (8 horas): $2.500.000 COP
+- Sesion de producto (10 productos): $400.000 COP
+
+FACTORES QUE AFECTAN EL PRECIO:
+- Horas adicionales: cada hora extra $150.000
+- Locaciones: 1 incluida, cada adicional +$200.000
+
+EXTRAS OPCIONALES:
+- Video highlight 1-2 min: +$500.000
+- Album impreso 30x30: +$350.000
+- Drone aereo: +$300.000
+- Segundo fotografo: +$400.000
+
+COMO CALCULO EL PRECIO:
+tipo_sesion + (horas_extra * 150000) + (locaciones_extra * 200000) + extras
+
+MONEDA: COP`}
+            />
+
+            <PromptExample
+              title="Taller Mecanico"
+              prompt={`Tengo taller de mecanica automotriz en Barranquilla, Colombia.
+
+MIS SERVICIOS Y PRECIOS:
+- Cambio aceite y filtros: $120.000 COP
+- Revision frenos completa: $180.000 COP
+- Alineacion y balanceo: $80.000 COP
+- Mantenimiento preventivo: $350.000 COP
+
+FACTORES QUE AFECTAN EL PRECIO:
+- Tipo vehiculo: carro particular sin recargo, camioneta +$50.000, pesado +$120.000
+
+EXTRAS OPCIONALES:
+- Lavado completo: +$40.000
+- Aceite sintetico premium: +$60.000
+- Servicio a domicilio: +$50.000
+
+COMO CALCULO EL PRECIO:
+servicio + recargo_vehiculo + extras
+
+MONEDA: COP`}
+            />
+
+            <PromptExample
+              title="Empresa de Mudanzas"
+              prompt={`Empresa de mudanzas y trasteos en Cali, Colombia.
+
+MIS SERVICIOS Y PRECIOS:
+- Apartaestudio local: $350.000 COP
+- Casa 1-2 habitaciones local: $600.000 COP
+- Casa 3+ habitaciones local: $950.000 COP
+- Mudanza entre ciudades: $1.800.000 COP
+
+FACTORES QUE AFECTAN EL PRECIO:
+- Pisos sin ascensor: cada piso +$50.000
+- Distancia extra: cada 10km sobre 20km incluidos +$40.000
+
+EXTRAS OPCIONALES:
+- Embalaje profesional: +$200.000
+- Seguro contra danos: +$150.000
+- Desarmado y armado muebles: +$120.000
+- Limpieza post-mudanza: +$100.000
+
+COMO CALCULO EL PRECIO:
+tipo_mudanza + (pisos * 50000) + (km_extra * 40000) + extras
+
+MONEDA: COP`}
+            />
+
+            <PromptExample
+              title="Empresa de Aseo"
+              prompt={`Empresa de aseo y limpieza en Pereira, Colombia.
+
+MIS SERVICIOS Y PRECIOS:
+- Aseo basico apartamento (hasta 60m2): $80.000 COP
+- Aseo profundo apartamento: $150.000 COP
+- Aseo casa (hasta 120m2): $120.000 COP
+- Aseo profundo casa: $220.000 COP
+- Limpieza oficina comercial: $180.000 COP
+
+FACTORES QUE AFECTAN EL PRECIO:
+- Area adicional: cada 20m2 extra +$25.000
+
+EXTRAS OPCIONALES:
+- Vidrios exteriores: +$40.000
+- Lavado tapetes: +$50.000
+- Desinfeccion profunda: +$35.000
+- Limpieza cocina industrial: +$60.000
+
+COMO CALCULO EL PRECIO:
+servicio_base + (area_extra * 25000) + extras
+
+MONEDA: COP`}
+            />
+          </div>
+
+          {/* Tips */}
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <Lightbulb className="h-4 w-4 text-primary" />
+              Tips para mejores resultados
+            </h3>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <TipItem text="Da precios concretos en numeros, no digas 'variable' o 'depende'" />
+              <TipItem text="Explica como calculas: si sumas, multiplicas o aplicas descuentos" />
+              <TipItem text="Separa el precio base de los extras opcionales" />
+              <TipItem text="Incluye al menos 3 servicios o productos para un cotizador completo" />
+              <TipItem text="Menciona la moneda si no es COP" />
+              <TipItem text="Piensa en que te pregunta siempre tu cliente cuando pide precio" />
+            </div>
+          </div>
+
+          {/* Errores comunes */}
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-red-500" />
+              Errores comunes a evitar
+            </h3>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <MistakeItem
+                bad="Hago paginas web"
+                why="Muy vago. No tiene precios, tipos de servicio ni extras. La IA tiene que inventar todo."
+              />
+              <MistakeItem
+                bad="Cobro segun el proyecto"
+                why="Sin precios concretos la IA no puede crear formulas. Da al menos rangos."
+              />
+              <MistakeItem
+                bad="Mis precios dependen de muchas cosas"
+                why="Enumera esas cosas y ponle un precio a cada una."
+              />
+              <MistakeItem
+                bad="Soy fotografo"
+                why="No dice que tipos de sesion, ni precios, ni extras. Agrega toda la informacion."
+              />
+            </div>
+          </div>
         </section>
 
         <Separator />

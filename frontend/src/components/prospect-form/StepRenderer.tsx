@@ -60,7 +60,12 @@ export function StepRenderer({ campos }: Props) {
                   className="flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition-all duration-200 hover:bg-primary/3 hover:border-primary/30 has-[data-state=checked]:border-primary has-[data-state=checked]:bg-primary/5 has-[data-state=checked]:shadow-sm has-[data-state=checked]:shadow-primary/10"
                 >
                   <RadioGroupItem value={opcion.valor} />
-                  <span className="flex-1 text-sm">{opcion.label}</span>
+                  <div className="flex-1">
+                    <span className="text-sm">{opcion.label}</span>
+                    {opcion.descripcion && (
+                      <p className="mt-0.5 text-xs text-muted-foreground leading-snug">{opcion.descripcion}</p>
+                    )}
+                  </div>
                 </label>
               ))}
             </RadioGroup>
@@ -70,7 +75,7 @@ export function StepRenderer({ campos }: Props) {
             <div className="space-y-2">
               {campo.opciones.map((opcion, i) => {
                 const current = respuestas[campo.id] || ""
-                const selected = current.split(",").filter(Boolean)
+                const selected = current ? current.split("|") : []
                 const isChecked = selected.includes(opcion.valor)
 
                 function toggle() {
@@ -80,9 +85,7 @@ export function StepRenderer({ campos }: Props) {
                   } else {
                     next = [...selected, opcion.valor]
                   }
-                  // Sumar todos los valores seleccionados
-                  const total = next.reduce((sum, v) => sum + Number(v), 0)
-                  setRespuesta(campo.id, String(total))
+                  setRespuesta(campo.id, next.join("|"))
                 }
 
                 return (
@@ -91,7 +94,12 @@ export function StepRenderer({ campos }: Props) {
                     className="flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition-all duration-200 hover:bg-primary/3 hover:border-primary/30 has-[data-state=checked]:border-primary has-[data-state=checked]:bg-primary/5"
                   >
                     <Checkbox checked={isChecked} onCheckedChange={toggle} />
-                    <span className="flex-1 text-sm">{opcion.label}</span>
+                    <div className="flex-1">
+                      <span className="text-sm">{opcion.label}</span>
+                      {opcion.descripcion && (
+                        <p className="mt-0.5 text-xs text-muted-foreground leading-snug">{opcion.descripcion}</p>
+                      )}
+                    </div>
                   </label>
                 )
               })}

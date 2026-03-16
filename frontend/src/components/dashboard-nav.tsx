@@ -16,7 +16,8 @@ export function DashboardNav() {
     router.replace("/login")
   }
 
-  const links = [
+  const links: { href: string; label: string; external?: boolean; exact?: boolean }[] = [
+    { href: "/dashboard", label: "Dashboard", exact: true },
     { href: "/cotizadores", label: "Cotizadores" },
     { href: "/historial", label: "Historial" },
     { href: "/configuracion", label: "Configuracion" },
@@ -31,15 +32,16 @@ export function DashboardNav() {
     <header className="sticky top-0 z-40 border-b border-border/50 glass">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
         <a
-          href="/cotizadores"
+          href="/dashboard"
           className="bg-gradient-to-r from-primary to-[oklch(0.55_0.16_310)] bg-clip-text text-lg font-bold tracking-tight text-transparent transition-opacity hover:opacity-80"
         >
           Tikno
         </a>
         <nav className="flex items-center gap-1 text-sm">
           {links.map((link) => {
-            const isActive =
-              !link.external && pathname?.startsWith(link.href)
+            const isActive = !link.external && (
+              link.exact ? pathname === link.href : pathname?.startsWith(link.href)
+            )
             return (
               <a
                 key={link.href}

@@ -64,4 +64,4 @@ class CotizadorPublicoSerializer(serializers.ModelSerializer):
 
 
 class CotizarRequestSerializer(serializers.Serializer):
-    respuestas = serializers.DictField(child=serializers.CharField())
+    respuestas = serializers.DictField(child=serializers.CharField(allow_blank=True))

@@ -27,16 +27,16 @@ class GroqClient:
         self.max_retries = 3
         self.timeout = 120
 
-    async def chat(self, prompt: str, system: str = "", json_mode: bool = False) -> str:
+    async def chat(self, prompt: str, system: str = "", json_mode: bool = False, model: str = None, temperature: float = 0.7) -> str:
         messages = []
         if system:
             messages.append({"role": "system", "content": system})
         messages.append({"role": "user", "content": prompt})
 
         body = {
-            "model": self.model,
+            "model": model or self.model,
             "messages": messages,
-            "temperature": 0.7,
+            "temperature": temperature,
         }
         if json_mode:
             body["response_format"] = {"type": "json_object"}
@@ -96,8 +96,8 @@ class GroqClient:
 
         raise last_error or AIClientError("Error desconocido tras reintentos")
 
-    def chat_sync(self, prompt: str, system: str = "", json_mode: bool = False) -> str:
-        return asyncio.run(self.chat(prompt, system, json_mode))
+    def chat_sync(self, prompt: str, system: str = "", json_mode: bool = False, model: str = None, temperature: float = 0.7) -> str:
+        return asyncio.run(self.chat(prompt, system, json_mode, model, temperature))
 
 
 # Alias para compatibilidad

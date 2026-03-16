@@ -26,7 +26,7 @@ class CotizacionPublicaSerializer(serializers.Serializer):
     email = serializers.EmailField()
     telefono = serializers.CharField(max_length=20, required=False, default="")
     empresa = serializers.CharField(max_length=255, required=False, default="")
-    respuestas = serializers.DictField(child=serializers.CharField())
+    respuestas = serializers.DictField(child=serializers.CharField(allow_blank=True))
 
 
 class EstadoSerializer(serializers.Serializer):

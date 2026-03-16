@@ -20,7 +20,9 @@ def parse_formula(formula: str, variables: dict) -> Decimal:
     for token in tokens:
         if re.match(r"^[a-zA-Z_]\w*$", token):
             if token not in variables:
-                raise FormulaError(f"Variable desconocida: '{token}'")
+                import logging
+                logging.getLogger(__name__).warning(f"Variable '{token}' no encontrada en respuestas, usando 0")
+                variables[token] = Decimal("0")
             try:
                 resolved.append(Decimal(str(variables[token])))
             except (InvalidOperation, TypeError):
@@ -104,7 +106,15 @@ def calcular_precio(cotizador_id: str, respuestas: dict) -> dict:
         variables = {**regla.variables}
         for campo_id, valor in respuestas.items():
             try:
-                variables[campo_id] = Decimal(str(valor))
+                str_valor = str(valor)
+                # Campos "multiple" almacenan valores separados por "|"
+                if "|" in str_valor:
+                    parts = str_valor.split("|")
+                    variables[campo_id] = sum(
+                        (Decimal(p) for p in parts if p), Decimal("0")
+                    )
+                else:
+                    variables[campo_id] = Decimal(str_valor)
             except (InvalidOperation, TypeError):
                 pass
 
