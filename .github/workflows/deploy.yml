@@ -1,0 +1,35 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-backend:
+    name: Deploy Backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Railway deploy (uncomment and set RAILWAY_TOKEN secret)
+      # - name: Install Railway CLI
+      #   run: npm i -g @railway/cli
+      # - name: Deploy
+      #   run: railway up --service backend
+      #   env:
+      #     RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Status
+        run: echo "Backend deploy ready. Set RAILWAY_TOKEN secret to enable."
+
+  deploy-frontend:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Vercel auto-deploys on push to main if connected via GitHub integration
+      # No action needed if Vercel is connected to the repo
+
+      - name: Status
+        run: echo "Frontend deploy ready. Connect Vercel to this repo or set VERCEL_TOKEN."
